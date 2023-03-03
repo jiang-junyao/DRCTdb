@@ -1,6 +1,7 @@
 # DRCTdb (temporary)
 Disease related cell type analysis to decode cell type effect and underlying regulatory mechanisms across human disease
 
+
 1. Formatting data from different sources
 
 2. Preprocessing data to get following ouputs: (I) scRNA-seq: seurat object with cell annotations in metadata; (II) scATAC-seq: seurat or ArchR object with cell annotations in metadata; (III) eqtl: SNPs region and related gene expression.
