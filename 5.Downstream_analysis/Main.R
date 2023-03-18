@@ -46,7 +46,7 @@ identify_region_tfs <- function(All_peaks_GR,pvalue.cutoff = 5e-05){
               All_peaks_GR,genome = BSgenome.Hsapiens.UCSC.hg38.masked,
               out='positions',p.cutoff = pvalue.cutoff)
   matched_motif <- Must_to_GR(Total_footprint_Motif)
-  
+  return(matched_motif)
 }
 
 
