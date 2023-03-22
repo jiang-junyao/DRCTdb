@@ -2,6 +2,8 @@ peak_anno <- function(merged_footprints, tssRegion = c(-3000, 3000)) {
   library(TxDb.Hsapiens.UCSC.hg38.knownGene)
   txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene
   library(org.Hs.eg.db)
+  merged_footprints[,2] = as.numeric(merged_footprints[,2])
+  merged_footprints[,3] = as.numeric(merged_footprints[,3])
   annodb <- 'org.Hs.eg.db'
   
   reference_GRange <- GenomicRanges::GRanges(seqnames = merged_footprints[,1],
@@ -113,7 +115,7 @@ motifs_select <- function(motif,gene){
 }
 
 identify_region_tfs <- function(All_peaks_GR,gene.use,PWM,motifdb,pvalue.cutoff = 5e-05){
-  library(motifmatch)
+  library(motifmatchr)
   library(BSgenome.Hsapiens.UCSC.hg38)
   motif_use = motifs_select(motifdb,gene.use)
   PWM = PWM[motif_use$Accession]
@@ -124,3 +126,23 @@ identify_region_tfs <- function(All_peaks_GR,gene.use,PWM,motifdb,pvalue.cutoff 
   return(matched_motif)
 }
 
+overlap_peak_motif <- function(peak,motif,motifdb){
+  overlaped = findOverlaps(peak,motif)
+  peak_motif = cbind(as.data.frame(peak[overlaped@from]),as.data.frame(motif[overlaped@to]))
+  peak_motif$TF = motifdb[match(peak_motif$motifs,motifdb$Accession),4]
+  return(peak_motif)
+}
+
+make_tf_target <- function(atac_out){
+  tf = atac_out$TF
+  tf = paste0(tf,'#',atac_out$symbol)
+  tf_target = unlist(map(tf,~paste_gene(.x)))
+  return(tf_target)
+}
+
+paste_gene <- function(gene){
+  tf = strsplit(gene,'#')[[1]][2]
+  target = strsplit(gene,'#')[[1]][1]
+  target = unlist(strsplit(target,';'))
+  return(paste0(tf,'-',target))
+}

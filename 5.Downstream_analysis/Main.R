@@ -1,56 +1,46 @@
+###load data
+library(Seurat)
+test = Read10X('E:\\public\\public_data\\10X\\multiomics\\PBMC_from_a Healthy_Donor_No_Cell_Sorting_(3k)\\pbmc_unsorted_3k_filtered_feature_bc_matrix\\filtered_feature_bc_matrix')
+peaks = test$Peaks
+peaks = rownames(peaks)[1:10000]
+peaks = strsplit(peaks,':')
+peaks = as.data.frame(t(as.data.frame(peaks)))
+region = strsplit(peaks$V2,'-')
+region = as.data.frame(t(as.data.frame(region)))
+peaks = cbind(peaks[,1],region)
+rna_test = test$`Gene Expression`
+rna_test = rna_test[1:1000,1:1000]
+rna_test = as.matrix(rna_test)
+colnames(peaks) = c('V1','V2','V3')
 
-Str_to_GR <- function(x){
-  sp = strsplit(x,split='-')
-  chr = sapply(sp,function(x) x[[1]])
-  s = as.numeric(sapply(sp,function(x) x[[2]]))
-  e = as.numeric(sapply(sp,function(x) x[[3]]))
-  GR_out = GRanges(chr,IRanges(s,e))
-  return(GR_out)
-}
+########################
+###identify tf-target from scatac
+########################
+library(IReNA)
+source('identify_region_motif.R')
+### peak annotation
+peak_gr = peak_anno(peaks)
+### find peak related motif
+PWM = readRDS('F:\\public\\Transfac_PWMatrixList.rds')
+motif1 = Tranfac201803_Hs_MotifTFsF
+gene.use = rownames(rna_test)
+peak_motif_gr = identify_region_tfs(peak_gr,gene.use,PWM,motif1)
+### overlap motif and peak
+atac_out = overlap_peak_motif(peak_gr,peak_motif_gr,motif1)
+tf_target = make_tf_target(atac_out)
+########################
+### infer grn from scRNA
+########################
+source('run_scenic.R')
+run_scenic_main(rna_test)
+rcistarget_out = readRDS('./int/2.1_tfModules_forMotifEnrichmet.Rds')
+geneie3_out = readRDS('./int/1.4_GENIE3_linkList.Rds')
+tf = t(as.data.frame(strsplit(names(rcistarget_out),'_')))[,1]
+geneie3_out = geneie3_out[geneie3_out$TF %in% tf,]
+geneie3_out = geneie3_out[geneie3_out$Target %in% unlist(rcistarget_out),]
 
-Seqnames <- function(x){
-  out= as.character(seqnames(x))
-  return(out)
-}
-
-Start <- function(x){
-  out= as.numeric(start(x))
-  return(out)
-}
-
-End <- function(x){
-  out= as.numeric(end(x))
-  return(out)
-}
-
-Must_to_GR <- function(x){
-  library('pbapply')
-  chr_all = pblapply(x,Seqnames)
-  start_all = pblapply(x,Start)
-  end_all = pblapply(x,End)
-  len_all = pblapply(x,function(x) length(x))
-  #####
-  chr_all = as.character(unlist(chr_all))
-  start_all = as.numeric(unlist(start_all))
-  end_all = as.numeric(unlist(end_all))
-  ##### ##### 
-  names_all = rep(names(x),len_all)
-  GR_out = GRanges(chr_all,IRanges(start_all,end_all),motifs=names_all)
-  return(GR_out)
-}
-
-identify_region_tfs <- function(All_peaks_GR,pvalue.cutoff = 5e-05){
-  library(motifmatchr)
-  library(BSgenome.Hsapiens.UCSC.hg38)
-  matched_motif <- matchMotifs(PWM,
-              All_peaks_GR,genome = BSgenome.Hsapiens.UCSC.hg38.masked,
-              out='positions',p.cutoff = pvalue.cutoff)
-  matched_motif <- Must_to_GR(Total_footprint_Motif)
-  return(matched_motif)
-}
-
-
-
-identify_regulation <- function(){
-  
-}
+########################
+### integration
+########################
+geneie3_out$idx = paste0(geneie3_out$TF,'-',geneie3_out$Target)
+geneie3_out = geneie3_out[geneie3_out$idx %in% tf_target,]
