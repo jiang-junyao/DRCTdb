@@ -8,7 +8,7 @@ Disease related cell type analysis to decode cell type effect and underlying r
 
 - scRNA-seq: seurat object with cell annotations in metadata
 - scATAC-seq: seurat or ArchR object with cell annotations in metadata
-- eqtl: SNPs region and related gene expression.
+- eQTL: SNPs region and related gene expression.
 
 3. Calculate the cell specific genomic intervals 
 
@@ -26,4 +26,4 @@ Cell specific open chromtin regions were uesed as input for LDSC
 - (I) Use disease related marker genes to perform co-expression analysis; 
 - (II) TF-target analysis in marker regions; 
 - (III) Integrate information from I and II to predict underlying regulation mechanisms in disease related cell types.
-- (IV) identify which SNPs open chromatin to cause disease and which SNPs close chromatin to cause disease
+- (IV) Identify which SNPs open chromatin to cause disease and which SNPs close chromatin to cause disease
