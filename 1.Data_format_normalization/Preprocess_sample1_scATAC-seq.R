@@ -20,5 +20,5 @@ sample1 <- CreateSeuratObject(
   meta.data = label
 )
 sample1$cell_type <- sample1$Cluster
-saveRDS(sample1,file = '../../data/scATAC-seq/sample1/Rds/sample1_seurat_obj.Rds')
+saveRDS(sample1,file = '../../data/scATAC-seq/sample1/Rds/sample1_seurat_obj_processed.Rds')
 

@@ -8,7 +8,7 @@ metadata <- read.delim("./MergedAllSamples_annotated/MergedAllSamples_annotated_
 
 obj <- CreateSeuratObject(merged_matrix,meta.data = metadata,project = 'Bone marrow 8k')
 obj$cell_type <- str_extract(obj$manual_annotation,'.*(?<!\\s\\d)') 
-saveRDS(obj,'sample13_Bone_marrow_RNA_4k.Rds')
+saveRDS(obj,'sample13_Bone_marrow_RNA_4k_processed.Rds')
 ##
 # sce <- obj %>% SCTransform() %>% RunPCA(verbose = FALSE) 
 # sce <- sce %>% RunUMAP(dims = 1:30,umap.method = 'umap-learn',metric = 'correlation',verbose = FALSE) 

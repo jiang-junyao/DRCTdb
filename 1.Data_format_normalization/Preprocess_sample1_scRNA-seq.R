@@ -12,6 +12,6 @@ obj <- SCTransform(obj) %>% RunPCA(verbose = FALSE) %>%
   RunUMAP(dims = 1:30,umap.method = 'umap-learn',metric = 'correlation',verbose = FALSE) %>%
   FindNeighbors(dims = 1:30, verbose = FALSE) %>%
   FindClusters(verbose = FALSE)
-saveRDS(obj,file = 'Rds/sce.Rds')
+saveRDS(obj,file = 'Rds/heart_processed.Rds')
 
 

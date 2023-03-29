@@ -34,4 +34,4 @@ sample13 <- CreateSeuratObject(
   meta.data = label
 )
 
-saveRDS(sample13,'sample13_Bone_marrow_ATAC_8k.Rds')
+saveRDS(sample13,'sample13_Bone_marrow_ATAC_4k_processed.Rds')
