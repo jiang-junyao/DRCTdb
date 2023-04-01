@@ -27,3 +27,4 @@ Cell specific open chromtin regions were uesed as input for LDSC
 - (II) TF-target analysis in marker regions; 
 - (III) Integrate information from I and II to predict underlying regulation mechanisms in disease related cell types.
 - (IV) Identify which SNPs open chromatin to cause disease and which SNPs close chromatin to cause disease
+- (V) Constuct GRN by [Cellorale](https://github.com/morris-lab/CellOracle)
