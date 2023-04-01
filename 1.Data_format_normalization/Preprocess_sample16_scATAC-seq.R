@@ -32,7 +32,6 @@ sample16 <- CreateSeuratObject(
   assay = "peaks",
   meta.data = meta_data
 )
-sample16$cell_type <- str_extract(sample16$cell_type,'.*(?<![.\\d])')
 saveRDS(sample16,'scATAC-seq/sample16_Bone_marrow_ATAC_Healthy_35k_processed.Rds')
 
 
@@ -73,7 +72,4 @@ sample16_2 <- CreateSeuratObject(
   assay = "peaks",
   meta.data = meta_data2
 )
-
-sample16_2$cell_type <- str_extract(sample16_2$cell_type,'.*(?<![.\\d])')
-
 saveRDS(sample16_2,'scATAC-seq/sample16_Bone_marrow_ATAC_all_70k_processed.Rds')
