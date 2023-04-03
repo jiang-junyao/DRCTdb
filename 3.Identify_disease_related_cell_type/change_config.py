@@ -4,6 +4,9 @@ Created on Mon Mar 27 15:34:07 2023
 
 @author: jjy
 """
+### arg1: cluster_use_path
+### arg2: original config path
+### arg3: modified config output path
 import sys
 sample_name = []
 with open(sys.argv[1],'r')as sample:
