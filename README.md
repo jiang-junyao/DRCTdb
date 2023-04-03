@@ -25,6 +25,5 @@ Cell specific open chromtin regions were uesed as input for LDSC
 5. Downstream analysis: 
 - (I) Use disease related marker genes to perform co-expression analysis; 
 - (II) TF-target analysis in marker regions; 
-- (III) Integrate information from I and II to predict underlying regulation mechanisms in disease related cell types.
+- (III) Integrate [SCENIC](https://github.com/morris-lab/CellOracle) and result of part II to reconstruct cell type-specific gene regulatory network.
 - (IV) Identify which SNPs open chromatin to cause disease and which SNPs close chromatin to cause disease
-- (V) Constuct GRN by [Cellorale](https://github.com/morris-lab/CellOracle)
