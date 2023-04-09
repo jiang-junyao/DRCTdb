@@ -16,10 +16,19 @@ cell_gr_list <- purrr::map(merged_matrix_df,function(x){
   return(gr)
 })
 
-for (i in 1:length(cell_gr_list)) {
-  filenames <- paste0('../../data/bed/sample3/',names(cell_gr_list)[i],'.bed.gz')
-  rtracklayer::export.bed(object = cell_gr_list[[i]],con = filenames)
-  cat(names(cell_gr_list)[i],'\n')
+
+merged_cell_type <- unique(str_extract(names(cell_gr_list),'.*(?<!\\s\\d)'))
+
+reduced_cell_type <- map(seq_along(merged_cell_type),function(i){
+  concensus_gr <- GenomicRanges::reduce(reduce(cell_gr_list[str_which(names(cell_gr_list),fixed(merged_cell_type[i]))],c))
+  return(concensus_gr)
+}) %>% setNames(merged_cell_type)
+
+
+for (i in 1:length(reduced_cell_type)) {
+  filenames <- paste0('../../data/bed/sample3/',names(reduced_cell_type)[i],'.bed.gz')
+  rtracklayer::export.bed(object = reduced_cell_type[[i]],con = filenames)
+  cat(names(reduced_cell_type)[i],'\n')
 }
 
 
