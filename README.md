@@ -13,7 +13,7 @@ Disease related cell type analysis to decode cell type effect and underlying r
 3. Calculate the cell specific genomic intervals 
 
 - scRNAseq:
-Top cell specific expressed gene(10%) based on the t statitic model (Described detail in [Finucane et al. 2018 Nat Genet.](https://www.nature.com/articles/s41588-018-0081-4) ), which used to determine the genetic window (100kb) as input.
+Top cell specific expressed gene(10%) based on the t statitic model (Described detail in [Finucane et al. 2018 Nat Genet.](https://www.nature.com/articles/s41588-018-0081-4)), which used to determine the genetic window (100kb) as input.
 
 - scATAC-seq:
 Cell specific open chromtin regions were uesed as input for LDSC
@@ -23,7 +23,7 @@ Cell specific open chromtin regions were uesed as input for LDSC
 4. Using [LDSC](https://github.com/bulik/ldsc/wiki/Cell-type-specific-analyses) to identify disease related cell type marker genes.
 
 5. Downstream analysis: 
-- (I) Use disease related marker genes to perform co-expression analysis; 
+- (I) Find diease related TFs and compare the TF activity between normal and diease cell type.
 - (II) TF-target analysis in marker regions; 
 - (III) Integrate [SCENIC](https://github.com/morris-lab/CellOracle) and result of part II to reconstruct cell type-specific gene regulatory network.
 - (IV) Identify which SNPs open chromatin to cause disease and which SNPs close chromatin to cause disease
