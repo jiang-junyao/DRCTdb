@@ -17,13 +17,27 @@ cell_gr_list <- purrr::map(merged_matrix_df,function(x){
 })
 
 
-merged_cell_type <- unique(str_extract(names(cell_gr_list),'.*(?<!\\s\\d)'))
+
+cell_type <- tibble(
+  raw_cell_type = names(cell_gr_list),
+  new_cell_type = map_chr(names(cell_gr_list),function(x){
+  if (is.na(str_extract(x,'.*(?=\\s\\d)'))) {
+    res <- x
+  }else{
+    res <- str_extract(x,'.*(?=\\s\\d)')
+  }
+}))
+
+merged_cell_type <- unique(cell_type$new_cell_type)
+
 
 reduced_cell_type <- map(seq_along(merged_cell_type),function(i){
   concensus_gr <- GenomicRanges::reduce(reduce(cell_gr_list[str_which(names(cell_gr_list),fixed(merged_cell_type[i]))],c))
   return(concensus_gr)
 }) %>% setNames(merged_cell_type)
 
+
+names(reduced_cell_type) <- str_replace(names(reduced_cell_type),'\\+','_')
 
 for (i in 1:length(reduced_cell_type)) {
   filenames <- paste0('../../data/bed/sample3/',names(reduced_cell_type)[i],'.bed.gz')
