@@ -40,9 +40,9 @@ peak_anno <- function(merged_footprints, tssRegion = c(-3000, 3000)) {
   peak_region2 <- paste0(merged_footprints[,1],':'
                          ,merged_footprints[,2],'-',merged_footprints[,3])
   merged_footprints2 <- merged_footprints[peak_region2%in%peak_region1,]
-  peak_gr=GenomicRanges::GRanges(seqnames = merged_footprints2$V1,
-                                 IRanges::IRanges(start=merged_footprints2$V2,
-                                                  end=merged_footprints2$V3))
+  peak_gr=GenomicRanges::GRanges(seqnames = merged_footprints2[,1],
+                                 IRanges::IRanges(start=merged_footprints2[,2],
+                                                  end=merged_footprints2[,3]))
   peak_gr$gene = gene
   peak_gr$symbol = symbol
   peak_gr$region = region2
@@ -141,8 +141,8 @@ make_tf_target <- function(atac_out){
 }
 
 paste_gene <- function(gene){
-  tf = strsplit(gene,'#')[[1]][2]
-  target = strsplit(gene,'#')[[1]][1]
-  target = unlist(strsplit(target,';'))
+  tf = strsplit(gene,'#')[[1]][1]
+  target = strsplit(gene,'#')[[1]][2]
+  tf = unlist(strsplit(tf,';'))
   return(paste0(tf,'-',target))
 }
