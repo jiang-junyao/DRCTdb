@@ -26,5 +26,5 @@ Cell specific open chromtin regions were uesed as input for LDSC
 - (I) Overlap disease related SNPs and cell-type specific CREs. In disease related samples, we suggest these SNPs open chromatin to cause disease. In normal sample, we suggest these SNPSs close chromatin to cause disease.
 - (II) (Optional) Identify cell type marker genes that are related SNPs by overlapping the gene's TSS (Transcription Start Site) region with the SNPs.
 - (III) Perform a Transcription Factor (TF) targeting analysis in the CREs identified in part I. This will help us further understand how the TFs might play a role in regulating specific genes in respective cell types.
-- (IV) When scATAC-seq data is available, integrating [GENIE3](https://github.com/vahuynh/GENIE3) and TF-target result of part IIII to reconstruct cell type-specific gene regulatory network. When scATAC-seq data is not available, using [SCENIC](https://github.com/morris-lab/CellOracle) to reconstruct cell type-specific gene regulatory network.
+- (IV) When scATAC-seq data is available, integrating [GENIE3](https://github.com/vahuynh/GENIE3) and TF-target result of part IIII to reconstruct cell type-specific gene regulatory network. When scATAC-seq data is not available, using [SCENIC](https://scenicplus.readthedocs.io/en/latest/index.html) to reconstruct cell type-specific gene regulatory network.
 
