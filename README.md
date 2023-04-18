@@ -24,6 +24,6 @@ Cell specific open chromtin regions were uesed as input for LDSC
 
 5. Downstream analysis: 
 - (I) Find diease related TFs and compare the TF activity between normal and diease cell type.
-- (II) TF-target analysis in marker regions; 
-- (III) Integrate [SCENIC](https://github.com/morris-lab/CellOracle) and result of part II to reconstruct cell type-specific gene regulatory network.
+- (II) TF-target analysis in marker regions.
+- (III) When scATAC-seq data is available, integrating [GENIE3](https://github.com/vahuynh/GENIE3) and result of part II to reconstruct cell type-specific gene regulatory network. When scATAC-seq data is not available, using [SCENIC](https://github.com/morris-lab/CellOracle) to reconstruct cell type-specific gene regulatory network.
 - (IV) Identify which SNPs open chromatin to cause disease and which SNPs close chromatin to cause disease
