@@ -27,13 +27,12 @@ writexl::write_xlsx(df2,'Summary_Statistics2.xlsx')
 df <- readxl::read_excel('Summary_Statistics.xlsx',sheet = 'Sheet1') %>% 
     select(2:1) %>% distinct(trait,.keep_all = T) %>% filter(!(trait %in% df2$trait))
 df$new_file <- paste0('../summary_statistics/GWAS_Catalog/',df$new_file)
-
-
-
 writexl::write_xlsx(df,'Summary_Statistics3.xlsx')
-
 df2 <- readxl::read_excel('Summary_Statistics.xlsx',sheet = 'Sheet2')
 
 
+df <- readxl::read_excel('Summary_Statistics.xlsx',sheet = 'Sheet2',col_names = F)
 
 
+text  = paste0(',{ trait = "',df$...1,'", trait_file = "',df$...2,'" }')
+writeLines(text,con = 'gwas.txt')
