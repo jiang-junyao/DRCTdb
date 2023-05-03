@@ -1,15 +1,39 @@
-library(Signac)
-library(Seurat)
-library(tidyverse)
-library(Matrix)
+### Preprocess scATAC-seq to get DBRs
+find_DBRs <- function(obj,test_method = 'wilcox'){
+  library(Signac)
+  library(GenomicRanges)
+  obj <- RunTFIDF(obj)
+  DBRs <- FindAllMarkers(obj,test.use = test_method)
+  str_peak <- length(strsplit(DBRs$gene[1],'-')[[1]])
+  if (str_peak == 2) {
+    DBRs_gr <- GRanges(rownames(DBRs))
+  }else if(str_peak == 3){
+    peak_name = t(as.data.frame(strsplit(DBRs$gene,'-')))
+    peak_name = paste0(peak_name[,1],':',peak_name[,2],'-',peak_name[,3])
+    DBRs_gr <- GRanges(peak_name)
+  }
+  
+  DBRs_gr$cluster <- DBRs$cluster
+  DBRs_gr$p_adj <- DBRs$p_val_adj
+  DBRs_gr$log2fc <- DBRs$avg_log2FC
+  return(DBRs_gr)
+}
 
-
-sample1_ATAC <- readRDS('../../data/scATAC-seq/sample1/Rds/sample1_scATAC-seq_80k_processed.Rds')
-
-df <- sample1_ATAC@assays$peaks@counts
-df <- df[str_starts(rownames(df),'chr'),]
-
-##subset columns, if your peak is less than 1M, your does not need to use multithreads
+#Only select peaks fomart as chrxx-xx-xxx
+subset_peaks <- function(x){
+  if (length(str_extract_all(x,'-')[[1]])== 2) {
+    if (str_starts(x,'chr')) {
+      return(TRUE)
+    }else{
+      return(FALSE)
+    }
+    return(TRUE)
+  }else{
+    return(FALSE)
+  }
+}
+### Preprocess scATAC-seq to get generate pseudobulk peaks
+#input sparse peaks by cell matrix
 generate_pseudobulk <- function(mat,group_by,ncore = NULL){
   cell_type  <-  unique(na.omit(group_by))
   row_name <- rownames(mat)
@@ -34,6 +58,8 @@ generate_pseudobulk <- function(mat,group_by,ncore = NULL){
   }
   return(result)
 }
+
+
 catable <- function (data, categories = c(quantile(data, c(0.01, 0.1, 0.5, 0.9, 0.99), na.rm = TRUE)), cumulative = FALSE, na.rm = TRUE, digits = 3){
   if (!is(data, "numeric")) 
     stop("data should be numeric vector")
@@ -76,29 +102,5 @@ catable <- function (data, categories = c(quantile(data, c(0.01, 0.1, 0.5, 0.9, 
   rownames(outmat) <- c("No", "Prop")
   outmat <- round(outmat, digits = digits)
   outmat
-}
-pseudobulk <- generate_pseudobulk(df,group_by = sample1_ATAC$cell_type)
-
-# pseudobulk <- generate_pseudobulk(df,group_by = na.omit(sample1_ATAC$cell_type))
-# identical(rownames(pseudobulk),rownames(df))
-# system.time(generate_pseudobulk(df,group_by = na.omit(sample1_ATAC$cell_type)))
-# 
-# pseudobulk2 <- generate_pseudobulk(df,group_by = na.omit(sample1_ATAC$cell_type),ncore = 10)
-# identical(rownames(pseudobulk),rownames(df))
-# identical(rownames(pseudobulk),rownames(pseudobulk2))
-# system.time(generate_pseudobulk(df,group_by = na.omit(sample1_ATAC$cell_type),ncore = 10))
-
-cell_gr <- separate(as.data.frame(rownames(pseudobulk)),col = everything(),sep = '-',into = c('seqnames','start','end'))
-
-cell_gr_list <- purrr::map(pseudobulk,function(x){
-  threshold <- str_extract(colnames(as.data.frame(catable(x)))[5],'\\d+') %>% as.numeric()
-  gr <- cell_gr[which(as.vector(x) >= threshold),] %>% GenomicRanges::makeGRangesFromDataFrame()
-  return(gr)
-})
-
-for (i in 1:length(cell_gr_list)) {
-  filenames <- paste0('../../data/bed/sample1/',names(cell_gr_list)[i],'.bed.gz')
-  rtracklayer::export.bed(object = cell_gr_list[[i]],con = filenames)
-  cat(names(cell_gr_list)[i],'\n')
 }
 
