@@ -4,12 +4,13 @@ library(tidyverse)
 library(Matrix)
 library(glue)
 source('preprocess_functions.R')
-sample16_ATAC <- readRDS('../../data/scATAC-seq/sample16/sample16_Bone_marrow_ATAC_Healthy_35k_processed.Rds')
+sample7_ATAC <- readRDS('../../data/scATAC-seq/Sample7/Sample7_peak_matrix.Rds')
 
-sparse_mtx <- sample16_ATAC@assays$peaks@counts
+sparse_mtx <- sample7_ATAC@assays@data$PeakMatrix
+rownames(sparse_mtx) <- paste(as.data.frame(sample7_ATAC@rowRanges)[[1]],as.data.frame(sample7_ATAC@rowRanges)[[2]],as.data.frame(sample7_ATAC@rowRanges)[[3]],sep = '-')
 sparse_mtx <- sparse_mtx[which(map_vec(rownames(sparse_mtx),subset_peaks)),]
 
-pseudobulk <- generate_pseudobulk(sparse_mtx,group_by = sample16_ATAC$cell_type)
+pseudobulk <- generate_pseudobulk(sparse_mtx,group_by = sample7_ATAC$Sample)
 cell_gr <- tidyr::separate(as.data.frame(rownames(pseudobulk)),col = everything(),sep = '-',into = c('seqnames','start','end'))
 
 cell_gr_list <- purrr::map(pseudobulk,function(x){
@@ -18,7 +19,7 @@ cell_gr_list <- purrr::map(pseudobulk,function(x){
   return(gr)
 })
 
-sample <- 'sample16'
+sample <- 'sample7'
 
 for (i in 1:length(cell_gr_list)) {
   if (!dir.exists(glue('../../data/bed/{sample}'))) {
