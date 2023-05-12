@@ -12,6 +12,7 @@ ct_use = intersect(rna$celltype,atac$cell_type)
 ldsc_result <- read.delim("E:/DRCTdb/ignore/LDSC_results/sample1/pvalues.tsv")
 ct_use = intersect(colnames(ldsc_result),ct_use)
 snp_all = readRDS('E:\\public\\all_snp_info_gr.Rds')
+ldsc_result$X = gsub(' ','_',ldsc_result$X)
 ###get all disease
 disease_all = dir('E:\\DRCTdb\\ignore\\LDSC_hg38\\summary_statistics\\Josh')
 disease_all_name = as.data.frame(t(as.data.frame(strsplit(disease_all,'\\.'))))
@@ -23,9 +24,10 @@ peak_name = paste0(peak_name[,1],':',peak_name[,2],'-',peak_name[,3])
 grn_list = list()
 for (i in 1:length(ct_use)) {
   ### define significant disease
-  disease_use = ldsc_result[,1][ldsc_result[,ct_use[1]]<0.05]
+  disease_use = ldsc_result[,1][ldsc_result[,ct_use[i]]<0.05]
   disease_use = unique(disease_use)
   disease_use = intersect(disease_use,names(disease_all))
+  print(disease_use)
   for (j in disease_use) {
       rna_use = subset(rna,celltype==ct_use[i])
       atac_use = subset(atac,cell_type==ct_use[i])
