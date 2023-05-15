@@ -22,12 +22,12 @@ names(disease_all) = disease_all_name[,4]
 peak_name = t(as.data.frame(strsplit(rownames(atac),'-')))
 peak_name = paste0(peak_name[,1],':',peak_name[,2],'-',peak_name[,3])
 grn_list = list()
+snp_list = list()
 for (i in 1:length(ct_use)) {
   ### define significant disease
   disease_use = ldsc_result[,1][ldsc_result[,ct_use[i]]<0.05]
   disease_use = unique(disease_use)
   disease_use = intersect(disease_use,names(disease_all))
-  print(disease_use)
   for (j in disease_use) {
       rna_use = subset(rna,celltype==ct_use[i])
       atac_use = subset(atac,cell_type==ct_use[i])
@@ -39,11 +39,31 @@ for (i in 1:length(ct_use)) {
       
       grn = ct_grn_atac(list1[[2]][,1:3],
                         unique(list1[[1]]$symbol),
-                        rna_use,cor_thr=0.2)
+                        rna_use,cor_thr=0.4)
       grn_name = paste0(ct_use[i],'_',j)
       grn_list[[grn_name]] = grn
+      snp_list[[grn_name]] = list1
   }
 
+}
+output_path = 'E:\\DRCTdb\\ignore\\downstream_result\\sample1\\'
+### output grn
+for (i in 1:length(grn_list)) {
+  name_use = names(grn_list)[i]
+  out1 = grn_list[[i]]
+  write.table(out1,paste0(output_path,'cor04/',name_use,'.txt')
+              ,quote = F,sep = '\t',row.names = F)
+}
+### output snp
+for (i in 1:length(snp_list)) {
+  name_use = names(snp_list)[i]
+  list_use = snp_list[[i]]
+  rna_snp = list_use[[1]]
+  atac_snp = list_use[[2]]
+  write.table(rna_snp,paste0(output_path,'rna_snp/',name_use,'.txt'),
+              quote = F,sep = '\t',row.names = F)
+  write.table(atac_snp,paste0(output_path,'atac_snp/',name_use,'.txt'),
+              quote = F,sep = '\t',row.names = F)
 }
 ### visualize
 for (i in grn_list) {
