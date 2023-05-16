@@ -23,11 +23,8 @@ sparse_mtx <- sparse_mtx[which(map_vec(rownames(sparse_mtx),subset_peaks)),]
 pseudobulk <- generate_pseudobulk(sparse_mtx,group_by = sample4_ATAC$Celltype)
 
 cell_gr <- tidyr::separate(as.data.frame(rownames(pseudobulk)),col = everything(),sep = '-',into = c('seqnames','start','end'))
-cell_gr_list <- purrr::map(pseudobulk,function(x){
-  threshold <- str_extract(colnames(as.data.frame(catable(x)))[5],'\\d+') %>% as.numeric()
-  gr <- cell_gr[which(as.vector(x) >= threshold),] %>% GenomicRanges::makeGRangesFromDataFrame()
-  return(gr)
-})
+cell_gr_list <- map(colnames(pseudobulk),get_cell_gr,seurat_Obj = sample4_ATAC)
+names(cell_gr_list) <- colnames(pseudobulk)
 
 sample <- 'sample4'
 

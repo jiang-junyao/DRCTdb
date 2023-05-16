@@ -37,6 +37,7 @@ subset_peaks <- function(x){
 generate_pseudobulk <- function(mat,group_by,ncore = NULL){
   cell_type  <-  unique(na.omit(group_by))
   row_name <- rownames(mat)
+  mat@x[mat@x > 0] <- 1
   if (is.null(ncore)) {
     result <- map_dfc(cell_type,function(x,mat){
       col_index <- which(group_by == x)  
@@ -59,6 +60,14 @@ generate_pseudobulk <- function(mat,group_by,ncore = NULL){
   return(result)
 }
 
+
+get_cell_gr <- function(cell_type, seurat_Obj,threshold = 0.025){
+  cell_num <-  length(which(seurat_Obj$cell_type == cell_type))
+  vec <- pseudobulk[[cell_type]]
+  min_cell <- ceiling(cell_num * 0.025)
+  gr <- cell_gr[which(as.vector(vec) >= min_cell),] %>% GenomicRanges::makeGRangesFromDataFrame()
+  return(gr)
+}
 
 catable <- function (data, categories = c(quantile(data, c(0.01, 0.1, 0.5, 0.9, 0.99), na.rm = TRUE)), cumulative = FALSE, na.rm = TRUE, digits = 3){
   if (!is(data, "numeric")) 
