@@ -19,8 +19,8 @@ sample4_ATAC <- readRDS('../../data/scATAC-seq/Sample4/Sample4_peak_matrix.Rds')
 sparse_mtx <- sample4_ATAC@assays@data$PeakMatrix
 rownames(sparse_mtx) <- paste(as.data.frame(sample4_ATAC@rowRanges)[[1]],as.data.frame(sample4_ATAC@rowRanges)[[2]],as.data.frame(sample4_ATAC@rowRanges)[[3]],sep = '-')
 sparse_mtx <- sparse_mtx[which(map_vec(rownames(sparse_mtx),subset_peaks)),]
-
-pseudobulk <- generate_pseudobulk(sparse_mtx,group_by = sample4_ATAC$Celltype)
+sample4_ATAC$cell_type <- sample4_ATAC$Celltype
+pseudobulk <- generate_pseudobulk(sparse_mtx,group_by = sample4_ATAC$cell_type)
 
 cell_gr <- tidyr::separate(as.data.frame(rownames(pseudobulk)),col = everything(),sep = '-',into = c('seqnames','start','end'))
 cell_gr_list <- map(colnames(pseudobulk),get_cell_gr,seurat_Obj = sample4_ATAC)
