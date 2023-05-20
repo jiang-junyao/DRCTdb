@@ -13,5 +13,18 @@ plot_grn <- function(data){
 plot_grn(data)
 
 
+pvalues <- read.delim("E:/DRCTdb/ignore/LDSC_results/sample1/pvalues.tsv")
 
+plot_disease_heatmap <- function(pvalues){
+  pvalues <- pvalues[!duplicated(pvalues[,1]),]
+  rownames(pvalues) <- pvalues[,1]
+  pvalues <- pvalues[,-1]
+  p2 <- -log10(pvalues)
 
+  Color1 <- c(rgb(102/255,46/255,115/255),rgb(31/255,153/255,139/255),rgb(251/255,232/255,48/255))
+
+  pheatmap::pheatmap(as.matrix(p2), cluster_cols =T, cluster_rows =
+                              T, color = colorRampPalette(Color1)(50),
+                            border_color=rgb(200/255,200/255,200/255))
+}
+plot_disease_heatmap(pvalues)
