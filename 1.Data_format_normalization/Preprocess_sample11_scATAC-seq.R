@@ -1,26 +1,22 @@
 library(ArchR)
-setwd('sample7/')
+setwd('~/sample11/')
 addArchRThreads(threads = 1) 
-addArchRGenome("hg38")
-
-inputFiles <- list.files('./fragment_file',pattern = '*.gz$',full.names = T)
-
+addArchRGenome("hg19")
+inputFiles <- list.files('./fragment',pattern = '*.gz$',full.names = T)
 ArrowFiles <- createArrowFiles(
   inputFiles = inputFiles,
-  sampleNames = str_extract(inputFiles,'(?<=73_).*(?=_)'),
+  sampleNames = paste0(rep('Control',11),1:11),
   minTSS = 4, 
   minFrags = 1000, 
   addTileMat = TRUE,
   addGeneScoreMat = TRUE
 )
-
-sample7 <- ArchRProject(
+sample11 <- ArchRProject(
   ArrowFiles = ArrowFiles, 
-  outputDirectory = "sample7_archR",
+  outputDirectory = "sample11_archR",
   copyArrows = TRUE)
-#sample7 <- loadArchRProject('sample7_archR/',showLogo = F)
-sample7 <- addIterativeLSI(
-  ArchRProj = sample7,
+sample11 <- addIterativeLSI(
+  ArchRProj = sample11,
   useMatrix = "TileMatrix", 
   name = "IterativeLSI", 
   iterations = 2, 
@@ -32,21 +28,22 @@ sample7 <- addIterativeLSI(
   varFeatures = 25000, 
   dimsToUse = 1:30
 )
-sample7 <- addHarmony(
-  ArchRProj = sample7,
+sample11 <- addHarmony(
+  ArchRProj = sample11,
   reducedDims = "IterativeLSI",
   name = "Harmony",
   groupBy = "Sample"
 )
-sample7 <- addClusters(
-  input = sample7,
+sample11 <- addClusters(
+  input = sample11,
   reducedDims = "IterativeLSI",
   method = "Seurat", 
   name = "Clusters",
-  resolution = 0.8
+  resolution = 0.8,
+  force = T
 )
-sample7 <- addUMAP(
-  ArchRProj = sample7, 
+sample11 <- addUMAP(
+  ArchRProj = sample11, 
   reducedDims = "IterativeLSI", 
   name = "UMAP", 
   nNeighbors = 30, 
@@ -54,37 +51,37 @@ sample7 <- addUMAP(
   metric = "cosine"
 )
 
-p1 <- plotEmbedding(ArchRProj = sample7, 
+p1 <- plotEmbedding(ArchRProj = sample11, 
                     colorBy = "cellColData", 
                     name = "Sample", 
                     embedding = "UMAP")
-p2 <- plotEmbedding(ArchRProj = sample7, 
+p2 <- plotEmbedding(ArchRProj = sample11, 
                     colorBy = "cellColData", 
                     name = "Clusters", 
                     embedding = "UMAP")
-plotPDF(p1,p2, name = "Plot-UMAP2Harmony-Sample7-Clusters.pdf", ArchRProj = sample7, addDOC = FALSE, width = 5, height = 5)
-saveArchRProject(ArchRProj = sample7, outputDirectory = "sample7_archR", load = FALSE)
+plotPDF(p1,p2, name = "Plot-UMAP2Harmony-sample11-Clusters.pdf", ArchRProj = sample11, addDOC = FALSE, width = 5, height = 5)
+saveArchRProject(ArchRProj = sample11, outputDirectory = "sample11_archR", load = FALSE)
 
-sample7 <- addGroupCoverages(ArchRProj = sample7,
+sample11 <- addGroupCoverages(ArchRProj = sample11,
                              groupBy = "Sample",
-                             minCells = 300,
-                             maxCells = 10000,
+                             minCells = 100,
+                             maxCells = 3000,
                              force = T)
-sample7 <- addReproduciblePeakSet(
-  ArchRProj = sample7, 
+sample11 <- addReproduciblePeakSet(
+  ArchRProj = sample11, 
   groupBy = "Sample", 
   pathToMacs2 = '/home/kyh/miniconda3/envs/deeptools/bin/macs2',
   force =T,
 )
-sample7 <- addPeakMatrix(sample7)
-saveArchRProject(ArchRProj = sample7, outputDirectory = "sample7_archR", load = TRUE)
+sample11 <- addPeakMatrix(sample11)
+saveArchRProject(ArchRProj = sample11, outputDirectory = "sample11_archR", load = TRUE)
 
 
 peak_matrix <- getMatrixFromProject(
-  ArchRProj = sample7,
+  ArchRProj = sample11,
   useMatrix = "PeakMatrix",
   useSeqnames = NULL,
   verbose = TRUE,
   binarize = FALSE
 )
-saveRDS(peak_matrix,file = 'Sample7_peak_matrix.Rds')
+saveRDS(peak_matrix,file = 'Sample11_peak_matrix.Rds')
