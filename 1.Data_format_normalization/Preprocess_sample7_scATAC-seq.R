@@ -8,8 +8,8 @@ inputFiles <- list.files('./fragment_file',pattern = '*.gz$',full.names = T)
 ArrowFiles <- createArrowFiles(
   inputFiles = inputFiles,
   sampleNames = str_extract(inputFiles,'(?<=73_).*(?=_)'),
-  filterTSS = 4, 
-  filterFrags = 1000, 
+  minTSS = 4, 
+  minFrags = 1000, 
   addTileMat = TRUE,
   addGeneScoreMat = TRUE
 )
