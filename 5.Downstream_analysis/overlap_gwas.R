@@ -4,8 +4,7 @@ gwas_related_features <- function(rna_use,atac_use,snp_all,
                                   disease_name,
                                   zscore_thr = 2){
   rna_features = rownames(extract_expressed_features(rna_use,cells_quantile = 0.1))
-  atac_features = rownames(extract_expressed_features(atac_use,cells_quantile =0.025))
-  atac_features = gsub('chr','',atac_features)
+  atac_features = gsub('chr','',atac_use)
   peak_gr = GenomicRanges::GRanges(atac_features)
   gene_tss = readRDS('E:\\public/hg38_gene_tss.rds')
   gene_tss_use = gene_tss[gene_tss$symbol %in% rna_features,]
