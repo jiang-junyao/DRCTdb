@@ -1,5 +1,5 @@
 library(ArchR)
-setwd('~/sample11/')
+setwd('.')
 addArchRThreads(threads = 1) 
 addArchRGenome("hg19")
 inputFiles <- list.files('./fragment',pattern = '*.gz$',full.names = T)
@@ -14,7 +14,7 @@ ArrowFiles <- createArrowFiles(
 sample11 <- ArchRProject(
   ArrowFiles = ArrowFiles, 
   outputDirectory = "sample11_archR",
-  copyArrows = TRUE)
+  copyArrows = FALSE)
 sample11 <- addIterativeLSI(
   ArchRProj = sample11,
   useMatrix = "TileMatrix", 
@@ -51,16 +51,6 @@ sample11 <- addUMAP(
   metric = "cosine"
 )
 
-p1 <- plotEmbedding(ArchRProj = sample11, 
-                    colorBy = "cellColData", 
-                    name = "Sample", 
-                    embedding = "UMAP")
-p2 <- plotEmbedding(ArchRProj = sample11, 
-                    colorBy = "cellColData", 
-                    name = "Clusters", 
-                    embedding = "UMAP")
-plotPDF(p1,p2, name = "Plot-UMAP2Harmony-sample11-Clusters.pdf", ArchRProj = sample11, addDOC = FALSE, width = 5, height = 5)
-saveArchRProject(ArchRProj = sample11, outputDirectory = "sample11_archR", load = FALSE)
 
 sample11 <- addGroupCoverages(ArchRProj = sample11,
                              groupBy = "Sample",
@@ -85,3 +75,4 @@ peak_matrix <- getMatrixFromProject(
   binarize = FALSE
 )
 saveRDS(peak_matrix,file = 'Sample11_peak_matrix.Rds')
+
