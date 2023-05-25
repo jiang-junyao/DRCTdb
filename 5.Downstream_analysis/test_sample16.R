@@ -6,28 +6,29 @@ source('identify_region_motif.R')
 source('overlap_gwas.R')
 source('plot.R')
 ### path need to define
-output_path = 'E:\\DRCTdb\\ignore\\downstream_result\\sample1\\'
-rna_path = 'E:\\DRCTdb\\ignore\\scRNA-seq\\sample1\\sample1_heart_scRNA_35k_processed.Rds'
-atac_path = 'E:\\DRCTdb\\ignore\\bed\\sample1/'
-
+output_path = 'E:\\DRCTdb\\ignore\\downstream_result\\sample16\\'
+rna_path = 'E:\\DRCTdb\\ignore\\scRNA-seq\\sample16\\sample16_Bone_marrow_RNA_Healthy_35k_processed.Rds'
+atac_path = 'E:\\DRCTdb\\ignore\\bed\\sample16/'
+ldsc_path = "E:/DRCTdb/ignore/LDSC_results/sample16/pvalues.tsv"
 #### db path
-ldsc_path = "E:/DRCTdb/ignore/LDSC_results/sample1/pvalues.tsv"
+
 snp_path = 'E:\\public\\all_snp_info_gr.Rds'
 disease_path = 'E:\\DRCTdb\\ignore\\LDSC_hg38\\summary_statistics\\Josh'
 
 ### create output folder
+
 dir.create(paste0(output_path,'grn_cor04'))
 dir.create(paste0(output_path,'grn_cor02'))
 dir.create(paste0(output_path,'rna_snp'))
 dir.create(paste0(output_path,'atac_snp'))
 dir.create(paste0(output_path,'ccc'))
-
 ###load data & define cell type use
 rna = readRDS(rna_path)
-rna@active.ident=as.factor(rna$celltype)
+rna@active.ident=as.factor(rna$cell_type)
 atac = dir(atac_path)
 atac_ct = unlist(strsplit(atac,'.bed.gz'))
-ct_use = intersect(rna$celltype,atac_ct)
+ct_use = intersect(rna@active.ident,atac_ct)
+rna[['ct']] = as.character(rna@active.ident)
 names(atac) = atac_ct
 atac = atac[names(atac) %in% ct_use]
 atac_list = list()
@@ -57,7 +58,7 @@ for (i in 1:length(ct_use)) {
   disease_use = unique(disease_use)
   disease_use = intersect(disease_use,names(disease_all))
   for (j in disease_use) {
-      rna_use = subset(rna,celltype==ct_use[i])
+      rna_use = subset(rna,ct==ct_use[i])
       list1 = gwas_related_features(rna_use,atac_list[[i]],
                             disease_name=j,
                             snp_all = snp_all,zscore_thr = 1)
@@ -100,8 +101,8 @@ for (i in 1:length(sig_ct_list)) {
   disease_name_use = names(sig_ct_list)[i]
   related_ct = sig_ct_list[[i]]
   if (length(related_ct)>1) {
-    rna_use = subset(rna,celltype %in% related_ct)
-    ccc = run_cellchat(rna_use,rna_use@meta.data,group = 'celltype',species = 'hs')
+    rna_use = subset(rna,ct %in% related_ct)
+    ccc = run_cellchat(rna_use,rna_use@meta.data,group = 'ct',species = 'hs')
     groupSize <- as.numeric(table(ccc@idents))
     par(mfrow=c(1,1))
     p1 = netVisual_circle(ccc@net$weight, vertex.weight = groupSize,
