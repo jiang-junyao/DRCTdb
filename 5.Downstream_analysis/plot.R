@@ -75,3 +75,98 @@ plot_disease_heatmap <- function(pvalues){
                             border_color=rgb(200/255,200/255,200/255))
 }
 #plot_disease_heatmap(pvalues)
+
+plot_enrich <- function(gene1){
+  library(clusterProfiler)
+  library(org.Hs.eg.db)
+  entrez_id <- bitr(gene1, 
+                    fromType = "SYMBOL", 
+                    toType = "ENTREZID", 
+                    OrgDb = org.Hs.eg.db)
+  gene_universe <- names(org.Hs.eg.db)
+  enrich_go <- enrichGO(gene = entrez_id$ENTREZID, 
+                            keyType = 'ENTREZID', 
+                            OrgDb = org.Hs.eg.db)
+  p_go = dotplot(enrich_result)
+  enrich_kegg <- enrichKEGG(gene = entrez_id$ENTREZID, 
+                              organism = 'hsa',use_internal_data = T)
+  p_kegg = dotplot(enrich_kegg)
+  list1 = list(enrich_go,enrich_kegg)
+  names(list1) = c('go','kegg')
+  return(list1)
+}
+plot_main <- function(path_use,enrich=T,heatmap=T,grn=T){
+  dir1 = dir(path_use)
+  for (i in dir1) {
+    ### kegg go plot
+    if (enrich) {
+      
+      library(ChIPseeker)
+      library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+      txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene
+      library(org.Hs.eg.db)
+      
+      dir_rna = dir(paste0(path_use,i,'/rna_snp'))
+      dir_atac = dir(paste0(path_use,i,'/rna_atac'))
+      dir.create(paste0(path_use,i,'/rna_enrich_kegg'))
+      dir.create(paste0(path_use,i,'/rna_enrich_go'))
+      dir.create(paste0(path_use,i,'/atac_enrich_kegg'))
+      dir.create(paste0(path_use,i,'/atac_enrich_go'))
+      
+      for (j in dir_rna) {
+        snp_rna = read.delim(paste0(path_use,i,'/rna_snp/',j))
+        enrich_plot = plot_enrich(snp_rna$symbol)
+        name_disease = unlist(strsplit(j,'.txt'))
+        kegg_path = paste0(path_use,i,'/rna_enrich_kegg/',name_disease,'_kegg.tiff')
+        go_path = paste0(path_use,i,'/rna_enrich_go/',name_disease,'_go.tiff')
+        
+        if (dim(enrich_plot$kegg)>1) {
+          tiff(filename = kegg_path, width = 10000, height = 6000, units = "px", res = 1200, compression = "lzw")
+          print(dotplot(enrich_plot$kegg))
+          dev.off()
+        }
+
+        if (dim(enrich_plot$go)>1) {
+          tiff(filename = go_path, width = 10000, height = 6000, units = "px", res = 1200, compression = "lzw")
+          print(dotplot(enrich_plot$go))
+          dev.off()
+        }
+      }
+      for (j in dir_atac) {
+        snp_atac = read.delim(paste0(path_use,i,'/atac_snp/',j))
+        snp_atac[,1] = paste0('chr',snp_atac[,1])
+        peaks = GenomicRanges::GRanges(paste0(snp_atac[,1],':',
+                                              snp_atac[,2],'-',
+                                              snp_atac[,3]))
+        peakAnno <- ChIPseeker::annotatePeak(peaks,
+                                             tssRegion = c(-3000, 3000),
+                                             TxDb = txdb, annoDb = 'org.Hs.eg.db')
+        enrich_plot = plot_enrich(peakAnno@anno$SYMBOL)
+        name_disease = unlist(strsplit(j,'.txt'))
+        kegg_path = paste0(path_use,i,'/atac_enrich_kegg/',name_disease,'_kegg.tiff')
+        go_path = paste0(path_use,i,'/atac_enrich_go/',name_disease,'_go.tiff')
+        
+        if (dim(enrich_plot$kegg)>1) {
+          tiff(filename = kegg_path, width = 10000, height = 6000, units = "px", res = 1200, compression = "lzw")
+          print(dotplot(enrich_plot$kegg))
+          dev.off()
+        }
+        
+        if (dim(enrich_plot$go)>1) {
+          tiff(filename = go_path, width = 10000, height = 6000, units = "px", res = 1200, compression = "lzw")
+          print(dotplot(enrich_plot$go))
+          dev.off()
+        }
+      }
+    }
+    ### ldsc heatmap
+    if (heatmap) {
+      
+    }
+    ### cell type specific grn
+    if (grn) {
+      
+    }
+    
+  }
+}
