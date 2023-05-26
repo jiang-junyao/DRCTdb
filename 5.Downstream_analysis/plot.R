@@ -107,7 +107,7 @@ plot_main <- function(path_use,enrich=T,heatmap=T,grn=T){
       library(org.Hs.eg.db)
       
       dir_rna = dir(paste0(path_use,i,'/rna_snp'))
-      dir_atac = dir(paste0(path_use,i,'/rna_atac'))
+      dir_atac = dir(paste0(path_use,i,'/atac_snp'))
       dir.create(paste0(path_use,i,'/rna_enrich_kegg'))
       dir.create(paste0(path_use,i,'/rna_enrich_go'))
       dir.create(paste0(path_use,i,'/atac_enrich_kegg'))
@@ -146,13 +146,13 @@ plot_main <- function(path_use,enrich=T,heatmap=T,grn=T){
         kegg_path = paste0(path_use,i,'/atac_enrich_kegg/',name_disease,'_kegg.tiff')
         go_path = paste0(path_use,i,'/atac_enrich_go/',name_disease,'_go.tiff')
         
-        if (dim(enrich_plot$kegg)>1) {
+        if (dim(enrich_plot$kegg)[1]>1) {
           tiff(filename = kegg_path, width = 10000, height = 6000, units = "px", res = 1200, compression = "lzw")
           print(dotplot(enrich_plot$kegg))
           dev.off()
         }
         
-        if (dim(enrich_plot$go)>1) {
+        if (dim(enrich_plot$go)[1]>1) {
           tiff(filename = go_path, width = 10000, height = 6000, units = "px", res = 1200, compression = "lzw")
           print(dotplot(enrich_plot$go))
           dev.off()
