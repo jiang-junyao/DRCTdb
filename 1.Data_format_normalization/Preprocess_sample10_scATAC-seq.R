@@ -74,6 +74,7 @@ sample10 <- addReproduciblePeakSet(
 )
 sample10 <- addPeakMatrix(sample10)
 
+saveArchRProject(ArchRProj = sample10, outputDirectory = "sample10_archR", load = TRUE)
 
 # for i in *.gz
 # do
