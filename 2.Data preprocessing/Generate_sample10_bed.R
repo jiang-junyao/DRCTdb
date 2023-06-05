@@ -7,6 +7,7 @@ source('preprocess_functions.R')
 sample10_ATAC <- readRDS('../../data/scATAC-seq/Sample10/sample10_peak_matrix.Rds')
 sample10_ATAC$cell_type <- str_replace(sample10_ATAC$cell_type,'\\+','_high')
 sample10_ATAC$cell_type <- str_replace_all(sample10_ATAC$cell_type,'/','_')
+sample10_ATAC$cell_type <- str_replace_all(sample10_ATAC$cell_type,' ','_')
 sparse_mtx <- sample10_ATAC@assays@data$PeakMatrix
 rownames(sparse_mtx) <- paste(as.data.frame(sample10_ATAC@rowRanges)[[1]],as.data.frame(sample10_ATAC@rowRanges)[[2]],as.data.frame(sample10_ATAC@rowRanges)[[3]],sep = '-')
 sparse_mtx <- sparse_mtx[which(map_vec(rownames(sparse_mtx),subset_peaks)),]
