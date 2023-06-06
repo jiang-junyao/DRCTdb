@@ -1,6 +1,3 @@
-setwd('E:\\DRCTdb\\5.Downstream_analysis')
-data = read.table('../ignore/downstream_result/sample1/grn_cor04/aCM_Atrial_fibrillation.txt',header = T)
-data$type = ifelse(data$value>0,'positive','negative')
 plot_grn_irena = function(data){
   library(igraph)
   library(IReNA)
@@ -38,26 +35,14 @@ plot_grn_irena = function(data){
   plot(g, layout = layout1, edge.curved = 0, vertex.label.cex =
          0.8, layout = layout1,
        vertex.shape='circle')
-  legend(x = 1.3, y = 1.3, levels(factor(igraph::V(g)$type)), pch = 21,
+  if (length(unique(nodes$type))>1) {
+    legend(x = 1.3, y = 1.3, levels(factor(igraph::V(g)$type)), pch = 21,
          col = "#777777", pt.bg = c('#E56145','#67C7C1'))
+  }
+  
 }
 #plot_grn_irena(data)
 
-
-
-plot_grn <- function(data){
-  library(ggraph)
-  ggraph(data,layout = 'fr') + 
-    geom_edge_density(aes(fill = value)) +
-    geom_edge_link(aes(width = abs(value),color=type,edge_alpha = abs(value)), alpha = 0.2,
-                   arrow = arrow(length = unit(5, 'mm')), end_cap = circle(0, 'mm')) + 
-    geom_node_point(size = 8,colour=rgb(220/255,20/255,60/255)) +
-    geom_node_text(aes(label = name), size = 4, repel = TRUE) +
-    geom_edge_loop()+
-    scale_color_brewer(palette = "Set2") +
-    theme_graph()
-}
-#plot_grn(data)
 
 
 pvalues <- read.delim("E:/DRCTdb/ignore/LDSC_results/sample1/pvalues.tsv")
@@ -73,6 +58,17 @@ plot_disease_heatmap <- function(pvalues){
   pheatmap::pheatmap(as.matrix(p2), cluster_cols =T, cluster_rows =
                               T, color = colorRampPalette(Color1)(50),
                             border_color=rgb(200/255,200/255,200/255))
+}
+plot_heatmap_all <- function(ldsc_result_path='E:\\DRCTdb\\ignore\\LDSC_results/',
+                             output_path = 'E:\\DRCTdb\\ignore\\downstream_result/'){
+  dir1 = dir(ldsc_result_path)
+  for (i in dir1) {
+    pvalue = read.delim(paste0(ldsc_result_path,i,'/pvalues.tsv'))
+    out_path = paste0(output_path,i,'/ldsc_heatmap.tiff')
+    tiff(filename = out_path, width = 12000, height = 9000, units = "px", res = 1200, compression = "lzw")
+    print(plot_disease_heatmap(pvalue))
+    dev.off()
+  }
 }
 #plot_disease_heatmap(pvalues)
 
@@ -95,7 +91,7 @@ plot_enrich <- function(gene1){
   names(list1) = c('go','kegg')
   return(list1)
 }
-plot_main <- function(path_use,enrich=T,heatmap=T,grn=T){
+plot_main <- function(path_use,enrich=T,grn=T){
   dir1 = dir(path_use)
   for (i in dir1) {
     ### kegg go plot
@@ -120,13 +116,13 @@ plot_main <- function(path_use,enrich=T,heatmap=T,grn=T){
         kegg_path = paste0(path_use,i,'/rna_enrich_kegg/',name_disease,'_kegg.tiff')
         go_path = paste0(path_use,i,'/rna_enrich_go/',name_disease,'_go.tiff')
         
-        if (dim(enrich_plot$kegg)>1) {
+        if (dim(enrich_plot$kegg)[1]>1) {
           tiff(filename = kegg_path, width = 10000, height = 6000, units = "px", res = 1200, compression = "lzw")
           print(dotplot(enrich_plot$kegg))
           dev.off()
         }
 
-        if (dim(enrich_plot$go)>1) {
+        if (dim(enrich_plot$go)[1]>1) {
           tiff(filename = go_path, width = 10000, height = 6000, units = "px", res = 1200, compression = "lzw")
           print(dotplot(enrich_plot$go))
           dev.off()
@@ -159,14 +155,38 @@ plot_main <- function(path_use,enrich=T,heatmap=T,grn=T){
         }
       }
     }
-    ### ldsc heatmap
-    if (heatmap) {
-      
-    }
     ### cell type specific grn
     if (grn) {
-      
+      print('plot grn!!')
+      dir.create(paste0(path_use,i,'/grn_cor02_fig'))
+      dir.create(paste0(path_use,i,'/grn_cor04_fig'))
+      grn02_path = dir(paste0(path_use,i,'/grn_cor02'))
+      grn04_path = dir(paste0(path_use,i,'/grn_cor04'))
+      for (j in grn02_path) {
+        grn_name = unlist(strsplit(j,'.txt'))
+        data = read.table(paste0(path_use,i,'/grn_cor02/',j),header = T)
+        data$type = ifelse(data$value>0,'positive','negative')
+        if (nrow(data)>=1) {
+          outpath = paste0(path_use,i,'/grn_cor02_fig/',grn_name,'.tiff')
+          tiff(filename = outpath, width = 15000, height = 12000, units = "px", res = 1200, compression = "lzw")
+          print(plot_grn_irena(data))
+          dev.off()
+        }
+        
+      }
+      for (j in grn04_path) {
+        grn_name = unlist(strsplit(j,'.txt'))
+        data = read.table(paste0(path_use,i,'/grn_cor04/',j),header = T)
+        data$type = ifelse(data$value>0,'positive','negative')
+        if (nrow(data)>=1) {
+          outpath = paste0(path_use,i,'/grn_cor04_fig/',grn_name,'.tiff')
+          tiff(filename = outpath, width = 15000, height = 12000, units = "px", res = 1200, compression = "lzw")
+          print(plot_grn_irena(data))
+          dev.off()
+        }
+        
+      }
     }
-    
+
   }
 }
