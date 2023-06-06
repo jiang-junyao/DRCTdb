@@ -41,11 +41,6 @@ plot_grn_irena = function(data){
   }
   
 }
-#plot_grn_irena(data)
-
-
-
-pvalues <- read.delim("E:/DRCTdb/ignore/LDSC_results/sample1/pvalues.tsv")
 
 plot_disease_heatmap <- function(pvalues){
   pvalues <- pvalues[!duplicated(pvalues[,1]),]
