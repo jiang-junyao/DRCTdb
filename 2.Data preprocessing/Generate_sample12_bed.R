@@ -7,7 +7,8 @@ source('preprocess_functions.R')
 sample12_ATAC <- readRDS('../../data/scATAC-seq/Sample12/Sample12_ATAC-seq.Rds')
 sparse_mtx <- sample12_ATAC@assays$peaks@counts
 sparse_mtx <- sparse_mtx[str_starts(rownames(sparse_mtx),'chr'),]
-sample12_ATAC$cell_type <- str_replace_all(sample12_ATAC$cell_type,'/','_')
+sample12_ATAC$cell_type <- str_replace_all(sample12_ATAC$cell_type,' ','_')
+sample12_ATAC$cell_type <- str_replace_all(sample12_ATAC$cell_type,'/','')
 
 pseudobulk <- generate_pseudobulk(sparse_mtx,group_by = sample12_ATAC$cell_type)
 
