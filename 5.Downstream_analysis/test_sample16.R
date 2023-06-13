@@ -95,6 +95,7 @@ colnames(sig_ct_df) = c('disease','related_cell_type')
 write.table(sig_ct_df,paste0(output_path,'disease_related_celltypes.txt'),
             quote = F,sep = '\t',row.names = F)
 ### disease related ccc
+source('F:\\general_code\\run_cellchat.R')
 ccc_plot_list = list()
 ccc_list = list()
 for (i in 1:length(sig_ct_list)) {
@@ -107,7 +108,7 @@ for (i in 1:length(sig_ct_list)) {
     par(mfrow=c(1,1))
     p1 = netVisual_circle(ccc@net$weight, vertex.weight = groupSize,
                           weight.scale = T, label.edge= F, 
-                          title.name = "",vertex.label.cex = 2)
+                          title.name = "",vertex.label.cex = 0.7)
     print(disease_name_use)
     ### disease related ccc
     ccc_plot_list[[i]] = p1
