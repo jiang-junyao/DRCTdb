@@ -109,7 +109,7 @@ for (i in 1:length(sig_ct_list)) {
     par(mfrow=c(1,1))
     p1 = netVisual_circle(ccc@net$weight, vertex.weight = groupSize,
                           weight.scale = T, label.edge= F, 
-                          title.name = "",vertex.label.cex = 1.1)
+                          title.name = "",vertex.label.cex = 0.5)
     print(disease_name_use)
     ### disease related ccc
     ccc_plot_list[[i]] = p1
@@ -137,8 +137,6 @@ for (i in 1:length(grn_list04)) {
   out1 = grn_list04[[i]]
   write.table(out1,paste0(output_path,'grn_cor04/',name_use,'.txt')
               ,quote = F,sep = '\t',row.names = F)
-  out1$type = ifelse(out1$value>0,'positive','negative')
-  plot_grn(out1)
 }
 for (i in 1:length(grn_list02)) {
   name_use = names(grn_list02)[i]
