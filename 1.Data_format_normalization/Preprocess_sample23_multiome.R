@@ -36,3 +36,5 @@ sample23 <- CreateSeuratObject(
 )
 sample23$cell_type <- sample23$subtype
 saveRDS(sample23,file = '../../data/scATAC-seq/sample23/sample23_scATAC-seq.Rds')
+##
+
