@@ -33,5 +33,20 @@ sample14 <- CreateSeuratObject(
   counts = chrom_assay,
   assay = "peaks"
 )
+metadata <- data.table::fread('../../data/scATAC-seq/Sample14/atac_metadata.csv',header = T)
 
-saveRDS(sample14,'../../data/scATAC-seq/Sample14/peak_matrix.Rds')
+metadata2 <- data.frame(
+  barcode = paste0(metadata$sample,'#',str_extract(metadata$V1,'[A-Z]+'),'-1'),
+  cell_type = metadata$cell_type
+)
+rownames(metadata2) <- metadata2$barcode
+
+
+cells <- intersect(colnames(sample14),metadata2$barcode)
+sample14_2 <- subset(sample14,cells = cells)
+metadata2 <- metadata2[cells,]
+
+identical(colnames(sample14_2),rownames(metadata2))
+
+sample14_2 <- AddMetaData(sample14_2,metadata = metadata2)
+saveRDS(sample14,'../../data/scATAC-seq/Sample14/sample14.Rds')
