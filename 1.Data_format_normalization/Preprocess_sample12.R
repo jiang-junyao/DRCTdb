@@ -6,6 +6,7 @@ sample12_RNA <- CreateSeuratObject(KSAC@assays$RNA@counts,meta.data = KSAC@meta.
 
 sample12_RNA$cell_type <- sample12_RNA$subclass.full
 saveRDS(sample12_RNA,'../../data/scRNA-seq/Sample12/Sample12_RNA-seq.Rds')
+#sample12_RNA <- readRDS('../../data/scRNA-seq/Sample12/Sample12_RNA-seq.Rds')
 
 chrom_assay <- CreateChromatinAssay(
   counts = KSAC@assays$ATAC$counts,
@@ -21,3 +22,4 @@ sample12_ATAC <- CreateSeuratObject(
 )
 sample12_ATAC$cell_type <- sample12_ATAC$subclass.full
 saveRDS(sample12_ATAC,'../../data/scATAC-seq/Sample12/Sample12_ATAC-seq.Rds')
+#sample12_ATAC <- readRDS('../../data/scATAC-seq/Sample12/Sample12_ATAC-seq.Rds')
