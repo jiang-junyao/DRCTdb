@@ -32,6 +32,8 @@ subset_peaks <- function(x){
     return(FALSE)
   }
 }
+
+
 ### Preprocess scATAC-seq to get generate pseudobulk peaks
 #input sparse peaks by cell matrix
 generate_pseudobulk <- function(mat,group_by,ncore = NULL){
@@ -68,6 +70,12 @@ get_cell_gr <- function(cell_type, seurat_Obj,threshold = 0.025){
   gr <- cell_gr[which(as.vector(vec) >= min_cell),] %>% GenomicRanges::makeGRangesFromDataFrame()
   return(gr)
 }
+
+#JASPAR2020 PWM to gene name
+mat2name <- function(x){
+  return(motif_symbol[str_which(names(motif_symbol),x)])
+}
+
 
 catable <- function (data, categories = c(quantile(data, c(0.01, 0.1, 0.5, 0.9, 0.99), na.rm = TRUE)), cumulative = FALSE, na.rm = TRUE, digits = 3){
   if (!is(data, "numeric")) 
