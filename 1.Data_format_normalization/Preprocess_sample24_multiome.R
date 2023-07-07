@@ -159,4 +159,41 @@ sample24_peak_matrix <- getMatrixFromProject(
   binarize = FALSE
 )
 saveRDS(sample24_peak_matrix,file = 'Sample24_peak_matrix.Rds')
+##
+library(Signac)
+library(Seurat)
+library(tidyverse)
+source('../2.Data preprocessing/preprocess_functions.R')
+sample24_ATAC <- readRDS('../../data/scATAC-seq/Sample24/Sample24_peak_matrix.Rds')
 
+
+coldata <- as.data.frame(sample24_ATAC@colData)
+coldata$raw_barcode <- rownames(coldata)
+sparse_mtx <- sample24_ATAC@assays@data$PeakMatrix
+rownames(sparse_mtx) <- paste(as.data.frame(sample24_ATAC@rowRanges)[[1]],as.data.frame(sample24_ATAC@rowRanges)[[2]],as.data.frame(sample24_ATAC@rowRanges)[[3]],sep = '-')
+sparse_mtx <- sparse_mtx[which(map_vec(rownames(sparse_mtx),subset_peaks)),]
+
+chrom_assay <- CreateChromatinAssay(
+  counts = sparse_mtx,
+  sep = c("-", "-"),
+  genome = 'hg38',
+  min.cells = 10,
+  min.features = 200
+)
+sample24 <- CreateSeuratObject(
+  counts = chrom_assay,
+  assay = "peaks"
+)
+
+all(colnames(sample24) %in% colnames(sample24_ATAC))
+identical(colnames(sample24),colnames(sample24_ATAC))
+
+metadata <- sample24_ATAC@colData |> as.data.frame()
+identical(colnames(sample24),rownames(metadata))
+
+sample24 <- AddMetaData(sample24,metadata = metadata)
+saveRDS(sample24,file = '../../data/scATAC-seq/Sample24/sample24_scATAC-seq_100k_all_processed.Rds')
+
+sample24_healthy <- subset(x = sample24,Diagnosis=='Unaffected')
+
+saveRDS(sample24_healthy,file = '../../data/scATAC-seq/Sample24/sample24_scATAC-seq_100k_healthy_processed.Rds')
