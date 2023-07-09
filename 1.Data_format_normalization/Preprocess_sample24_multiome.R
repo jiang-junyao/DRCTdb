@@ -197,3 +197,6 @@ saveRDS(sample24,file = '../../data/scATAC-seq/Sample24/sample24_scATAC-seq_100k
 sample24_healthy <- subset(x = sample24,Diagnosis=='Unaffected')
 
 saveRDS(sample24_healthy,file = '../../data/scATAC-seq/Sample24/sample24_scATAC-seq_100k_healthy_processed.Rds')
+
+
+
