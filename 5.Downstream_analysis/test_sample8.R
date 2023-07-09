@@ -1,43 +1,57 @@
 library(Seurat)
 library(igraph)
 library(GenomicRanges)
+library(stringr)
+library(IReNA)
 setwd('E:\\DRCTdb\\5.Downstream_analysis')
 source('identify_region_motif.R')
 source('overlap_gwas.R')
 source('plot.R')
 ### path need to define
-output_path = 'E:\\DRCTdb\\ignore\\downstream_result\\sample7\\'
-dir.create(output_path)
-rna_path = 'E:\\DRCTdb\\ignore\\scRNA-seq\\sample7\\Processed_scRNA-seq.rds'
-atac_path = 'E:\\DRCTdb\\ignore\\bed\\sample7/'
-ldsc_path = "E:/DRCTdb/ignore/LDSC_results/sample7/pvalues.tsv"
+output_path = 'E:\\DRCTdb\\ignore\\downstream_result\\sample8\\'
+rna_path = 'F:\\DRCTdb\\ignore\\scRNA-seq\\sample8\\sample8_scRNA_processed_68k.Rds'
+atac_path = 'E:\\DRCTdb\\ignore\\bed\\sample8/'
+ldsc_path = "E:/DRCTdb/ignore/LDSC_results/sample8/pvalues.tsv"
 #### db path
 
 snp_path = 'E:\\public\\all_snp_info_gr.Rds'
 disease_path = 'E:\\DRCTdb\\ignore\\LDSC_hg38\\summary_statistics\\Josh'
-
+source('F:\\general_code\\run_cellchat.R')
 ### create output folder
-dir.create(paste0(output_path,'ccc'))
+
 dir.create(paste0(output_path,'grn_cor04'))
 dir.create(paste0(output_path,'grn_cor02'))
 dir.create(paste0(output_path,'rna_snp'))
 dir.create(paste0(output_path,'atac_snp'))
-
-
-###loact_m = gsub('strocyte','Astrocyte',ct_m)d data & define cell type use
+dir.create(paste0(output_path,'ccc'))
+###load data & define cell type use
 rna = readRDS(rna_path)
-### modify cell type in rna seurat
-ct_m = rna$cell_type__custom
-ct_m = gsub('AII-amacrine','AIIamacrine',ct_m)
-ct_m = gsub('GABA-amacrine','GABAamacrine',ct_m)
-ct_m = gsub('Gly-amacrine','Glyamacrine',ct_m)
-ct_m = gsub('Muller glia ','Mullerglia',ct_m)
-ct_m = gsub('ON-cone bipolar','ONconebipolar',ct_m)
-ct_m = gsub('OFF-cone bipolar','OFFconebipolar',ct_m)
-ct_m = gsub('Retinal ganglion cell','Retinalganglioncell',ct_m)
-ct_m = gsub('Rod bipolar','Rodbipolar',ct_m)
 
-rna@active.ident=as.factor(ct_m)
+ct1 = as.character(rna$cell_type)
+ct1 = gsub('endothelial cell','ENDO',ct1)
+ct1 = gsub('B cell','BCELL',ct1)
+ct1 = gsub('T cell','TCELL',ct1)
+ct1 = gsub('podocyte','PCT',ct1)
+ct1 = gsub('parietal epithelial cell','PEC',ct1)
+ct1 = gsub('fibroblast','FIB_VSMC_MC',ct1)
+rna[['ct1']] = ct1
+
+rna@active.ident=as.factor(rna$ct1)
+
+
+if (str_sub(rownames(rna)[1],1,3)=='ENS') {
+  gene1 = Converse_GeneIDSymbol(rownames(rna),Spec1 = 'Hs')
+  rna = subset(rna,features=gene1[,1])
+  rna2 = rna@assays$RNA@counts
+  rownames(rna2) = gene1[,2]
+  rna2 = CreateSeuratObject(rna2)
+  rna2 = NormalizeData(rna2)
+  rna2[['ct1']] = rna$ct1
+  rna2@active.ident=as.factor(rna2$ct1)
+  rna = rna2
+}
+
+
 atac = dir(atac_path)
 atac_ct = unlist(strsplit(atac,'.bed.gz'))
 ct_use = intersect(rna@active.ident,atac_ct)
@@ -60,13 +74,7 @@ disease_all = dir(disease_path)
 disease_all_name = as.data.frame(t(as.data.frame(strsplit(disease_all,'\\.'))))
 names(disease_all) = disease_all_name[,4]
 
-###
-rna2 = rna@assays$RNA@counts
-gene1=Converse_GeneIDSymbol(rownames(rna2),Spec1 = 'Hs')
-rna2 = rna2[gene1[,1],]
-rownames(rna2) = gene1[,2]
-rna2=CreateSeuratObject(rna2)
-rna2=SCTransform(rna2)
+
 ### main calculation part
 grn_list04 = list()
 grn_list02 = list()
@@ -77,8 +85,7 @@ for (i in 1:length(ct_use)) {
   disease_use = unique(disease_use)
   disease_use = intersect(disease_use,names(disease_all))
   for (j in disease_use) {
-      cell_use_name = rownames(rna@meta.data)[rna@meta.data$ct==ct_use[i]]
-      rna_use = subset(rna2,cells=cell_use_name)
+      rna_use = subset(rna,ct==ct_use[i])
       list1 = gwas_related_features(rna_use,atac_list[[i]],
                             disease_name=j,
                             snp_all = snp_all,zscore_thr = 1)
@@ -115,20 +122,20 @@ colnames(sig_ct_df) = c('disease','related_cell_type')
 write.table(sig_ct_df,paste0(output_path,'disease_related_celltypes.txt'),
             quote = F,sep = '\t',row.names = F)
 ### disease related ccc
+source('F:\\general_code\\run_cellchat.R')
 ccc_plot_list = list()
 ccc_list = list()
-rna2[['ct']] = rna$ct
 for (i in 1:length(sig_ct_list)) {
   disease_name_use = names(sig_ct_list)[i]
   related_ct = sig_ct_list[[i]]
   if (length(related_ct)>1) {
-    rna_use = subset(rna2,ct %in% related_ct)
+    rna_use = subset(rna,ct %in% related_ct)
     ccc = run_cellchat(rna_use,rna_use@meta.data,group = 'ct',species = 'hs')
     groupSize <- as.numeric(table(ccc@idents))
     par(mfrow=c(1,1))
     p1 = netVisual_circle(ccc@net$weight, vertex.weight = groupSize,
                           weight.scale = T, label.edge= F, 
-                          title.name = "",vertex.label.cex = 1)
+                          title.name = "",vertex.label.cex = 0.7)
     print(disease_name_use)
     ### disease related ccc
     ccc_plot_list[[i]] = p1
@@ -161,6 +168,9 @@ for (i in 1:length(grn_list04)) {
   write.table(out1,paste0(output_path,'grn_cor04/',name_use,'.txt')
               ,quote = F,sep = '\t',row.names = F)
   out1$type = ifelse(out1$value>0,'positive','negative')
+  svg(filename = filenames2, width = 4, height = 4)
+  print(ccc_plot_list[[i]])
+  dev.off()
   plot_grn(out1)
 }
 for (i in 1:length(grn_list02)) {

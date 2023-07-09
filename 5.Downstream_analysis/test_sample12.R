@@ -123,8 +123,12 @@ names(ccc_list) = names(sig_ct_list)
 for (i in 1:length(ccc_plot_list)) {
   name_use = names(ccc_plot_list)[i]
   filenames = paste0(output_path,'ccc/',name_use,'.tiff')
+  filenames2 = paste0(output_path,'ccc/',name_use,'.svg')
   if (!is.null(ccc_plot_list[[i]])) {
     tiff(filename = filenames, width = 10000, height = 6000, units = "px", res = 1200, compression = "lzw")
+    print(ccc_plot_list[[i]])
+    dev.off()
+    svg(filename = filenames2, width = 4, height = 4)
     print(ccc_plot_list[[i]])
     dev.off()
   }

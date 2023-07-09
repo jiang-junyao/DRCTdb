@@ -116,6 +116,7 @@ write.table(sig_ct_df,paste0(output_path,'disease_related_celltypes.txt'),
 ### disease related ccc
 ccc_plot_list = list()
 ccc_list = list()
+source('F:\\general_code\\run_cellchat.R')
 for (i in 1:length(sig_ct_list)) {
   disease_name_use = names(sig_ct_list)[i]
   related_ct = sig_ct_list[[i]]
@@ -126,7 +127,7 @@ for (i in 1:length(sig_ct_list)) {
     par(mfrow=c(1,1))
     p1 = netVisual_circle(ccc@net$weight, vertex.weight = groupSize,
                      weight.scale = T, label.edge= F, 
-                     title.name = "",vertex.label.cex = 2)
+                     title.name = "",vertex.label.cex = 1)
     print(disease_name_use)
     ### disease related ccc
     ccc_plot_list[[i]] = p1
@@ -140,8 +141,12 @@ names(ccc_list) = names(sig_ct_list)
 for (i in 1:length(ccc_plot_list)) {
   name_use = names(ccc_plot_list)[i]
   filenames = paste0(output_path,'ccc/',name_use,'.tiff')
+  filenames2 = paste0(output_path,'ccc/',name_use,'.svg')
   if (!is.null(ccc_plot_list[[i]])) {
       tiff(filename = filenames, width = 10000, height = 6000, units = "px", res = 1200, compression = "lzw")
+      print(ccc_plot_list[[i]])
+      dev.off()
+      svg(filename = filenames2, width = 4, height = 4)
       print(ccc_plot_list[[i]])
       dev.off()
   }

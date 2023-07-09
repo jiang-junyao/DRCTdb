@@ -14,7 +14,7 @@ ldsc_path = "E:/DRCTdb/ignore/LDSC_results/sample16/pvalues.tsv"
 
 snp_path = 'E:\\public\\all_snp_info_gr.Rds'
 disease_path = 'E:\\DRCTdb\\ignore\\LDSC_hg38\\summary_statistics\\Josh'
-
+source('F:\\general_code\\run_cellchat.R')
 ### create output folder
 
 dir.create(paste0(output_path,'grn_cor04'))
@@ -122,8 +122,12 @@ names(ccc_list) = names(sig_ct_list)
 for (i in 1:length(ccc_plot_list)) {
   name_use = names(ccc_plot_list)[i]
   filenames = paste0(output_path,'ccc/',name_use,'.tiff')
+  filenames2 = paste0(output_path,'ccc/',name_use,'.svg')
   if (!is.null(ccc_plot_list[[i]])) {
     tiff(filename = filenames, width = 10000, height = 6000, units = "px", res = 1200, compression = "lzw")
+    print(ccc_plot_list[[i]])
+    dev.off()
+    svg(filename = filenames2, width = 4, height = 4)
     print(ccc_plot_list[[i]])
     dev.off()
   }
@@ -137,6 +141,9 @@ for (i in 1:length(grn_list04)) {
   write.table(out1,paste0(output_path,'grn_cor04/',name_use,'.txt')
               ,quote = F,sep = '\t',row.names = F)
   out1$type = ifelse(out1$value>0,'positive','negative')
+  svg(filename = filenames2, width = 4, height = 4)
+  print(ccc_plot_list[[i]])
+  dev.off()
   plot_grn(out1)
 }
 for (i in 1:length(grn_list02)) {

@@ -56,11 +56,12 @@ plot_disease_heatmap <- function(pvalues){
 }
 plot_heatmap_all <- function(ldsc_result_path='E:\\DRCTdb\\ignore\\LDSC_results/',
                              output_path = 'E:\\DRCTdb\\ignore\\downstream_result/'){
-  dir1 = dir(ldsc_result_path)
+  dir1 = dir(output_path)
   for (i in dir1) {
     pvalue = read.delim(paste0(ldsc_result_path,i,'/pvalues.tsv'))
     out_path = paste0(output_path,i,'/ldsc_heatmap.tiff')
-    tiff(filename = out_path, width = 12000, height = 9000, units = "px", res = 1200, compression = "lzw")
+    out_path2 = paste0(output_path,i,'/ldsc_heatmap.svg')
+    svg(filename = out_path2, width = 12, height = 10)
     print(plot_disease_heatmap(pvalue))
     dev.off()
   }
@@ -78,7 +79,7 @@ plot_enrich <- function(gene1){
   enrich_go <- enrichGO(gene = entrez_id$ENTREZID, 
                             keyType = 'ENTREZID', 
                             OrgDb = org.Hs.eg.db)
-  p_go = dotplot(enrich_result)
+  p_go = dotplot(enrich_go)
   enrich_kegg <- enrichKEGG(gene = entrez_id$ENTREZID, 
                               organism = 'hsa',use_internal_data = T)
   p_kegg = dotplot(enrich_kegg)
@@ -108,17 +109,17 @@ plot_main <- function(path_use,enrich=T,grn=T){
         snp_rna = read.delim(paste0(path_use,i,'/rna_snp/',j))
         enrich_plot = plot_enrich(snp_rna$symbol)
         name_disease = unlist(strsplit(j,'.txt'))
-        kegg_path = paste0(path_use,i,'/rna_enrich_kegg/',name_disease,'_kegg.tiff')
-        go_path = paste0(path_use,i,'/rna_enrich_go/',name_disease,'_go.tiff')
+        kegg_path = paste0(path_use,i,'/rna_enrich_kegg/',name_disease,'_kegg.svg')
+        go_path = paste0(path_use,i,'/rna_enrich_go/',name_disease,'_go.svg')
         
         if (dim(enrich_plot$kegg)[1]>1) {
-          tiff(filename = kegg_path, width = 10000, height = 6000, units = "px", res = 1200, compression = "lzw")
+          svg(filename = kegg_path, width = 8, height = 8)
           print(dotplot(enrich_plot$kegg))
           dev.off()
         }
 
         if (dim(enrich_plot$go)[1]>1) {
-          tiff(filename = go_path, width = 10000, height = 6000, units = "px", res = 1200, compression = "lzw")
+          svg(filename = go_path, width = 8, height = 8)
           print(dotplot(enrich_plot$go))
           dev.off()
         }
@@ -138,13 +139,13 @@ plot_main <- function(path_use,enrich=T,grn=T){
         go_path = paste0(path_use,i,'/atac_enrich_go/',name_disease,'_go.tiff')
         
         if (dim(enrich_plot$kegg)[1]>1) {
-          tiff(filename = kegg_path, width = 10000, height = 6000, units = "px", res = 1200, compression = "lzw")
+          svg(filename = kegg_path, width = 8, height = 8)
           print(dotplot(enrich_plot$kegg))
           dev.off()
         }
         
         if (dim(enrich_plot$go)[1]>1) {
-          tiff(filename = go_path, width = 10000, height = 6000, units = "px", res = 1200, compression = "lzw")
+          svg(filename = go_path, width = 8, height = 8)
           print(dotplot(enrich_plot$go))
           dev.off()
         }
