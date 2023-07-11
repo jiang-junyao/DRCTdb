@@ -8,10 +8,10 @@ source('identify_region_motif.R')
 source('overlap_gwas.R')
 source('plot.R')
 ### path need to define
-output_path = 'E:\\DRCTdb\\ignore\\downstream_result\\sample8\\'
-rna_path = 'F:\\DRCTdb\\ignore\\scRNA-seq\\sample8\\sample8_scRNA_processed_68k.Rds'
-atac_path = 'E:\\DRCTdb\\ignore\\bed\\sample8/'
-ldsc_path = "E:/DRCTdb/ignore/LDSC_results/sample8/pvalues.tsv"
+output_path = 'E:\\DRCTdb\\ignore\\downstream_result\\sample11\\'
+rna_path = 'F:\\DRCTdb\\ignore\\scRNA-seq\\sample11\\Sample11_processed_PBMC_healthy_173k.Rds'
+atac_path = 'E:\\DRCTdb\\ignore\\bed\\sample11/hg38_bed/'
+ldsc_path = "E:/DRCTdb/ignore/LDSC_results/sample11/pvalues.tsv"
 #### db path
 
 snp_path = 'E:\\public\\all_snp_info_gr.Rds'
@@ -28,17 +28,36 @@ dir.create(paste0(output_path,'ccc'))
 rna = readRDS(rna_path)
 
 ct1 = as.character(rna$cell_type)
-ct1 = gsub('endothelial cell','ENDO',ct1)
-ct1 = gsub('B cell','BCELL',ct1)
-ct1 = gsub('T cell','TCELL',ct1)
-ct1 = gsub('podocyte','PCT',ct1)
-ct1 = gsub('parietal epithelial cell','PEC',ct1)
-ct1 = gsub('fibroblast','FIB_VSMC_MC',ct1)
+ct1 = gsub('regulatory T cell',"Treg",ct1)
+ct1 = gsub('natural killer cell',"NK",ct1)
+ct1 = gsub('hematopoietic precursor cell',"Hspc",ct1)
+ct1 = gsub('conventional dendritic cell',"cDC1",ct1)
+ct1 = gsub('classical monocyte',"CD14_Mono",ct1)
+ct1 = gsub('non-classical monocyte',"CD16_Mono",ct1)
+ct1 = gsub('naive B cell',"B_Naive",ct1)
+ct1 = gsub('class switched memory B cell',"B_Memory",ct1)
+ct1 = gsub('naive thymus-derived CD8-positive, alpha-beta T cell',"CD8_Naive",ct1)
+ct1 = gsub('naive thymus-derived CD4-positive, alpha-beta T cell',"CD4_Naive",ct1)
+ct1 = gsub('CD8-positive, alpha-beta cytotoxic T cell',"CD8_stim",ct1)
+ct1 = gsub('CD4-positive helper T cell',"CD4",ct1)
+ct1 = gsub('CD4-positive, alpha-beta cytotoxic T cell',"CD4",ct1)
+ct1 = gsub('effector memory CD8-positive, alpha-beta T cell, terminally differentiated',"CD8_activated",ct1)
 rna[['ct1']] = ct1
-
 rna@active.ident=as.factor(rna$ct1)
-
-
+atac = dir(atac_path)
+atac_ct = unlist(strsplit(atac,'.bed.gz'))
+ct_use = intersect(rna@active.ident,atac_ct)
+rna = subset(rna,ct1 %in% ct_use)
+barcode_use = c()
+for (i in unique(ct_use)) {
+  rna2 = subset(rna,ct1==i)
+  if (ncol(rna2)>3000) {
+    barcode_use = c(barcode_use,colnames(rna2)[sample(1:ncol(rna2),3000)])
+  }else{
+    barcode_use = c(barcode_use,colnames(rna2))
+  }
+}
+rna = subset(rna,cells=barcode_use)
 if (str_sub(rownames(rna)[1],1,3)=='ENS') {
   gene1 = Converse_GeneIDSymbol(rownames(rna),Spec1 = 'Hs')
   rna = subset(rna,features=gene1[,1])
@@ -52,9 +71,7 @@ if (str_sub(rownames(rna)[1],1,3)=='ENS') {
 }
 
 
-atac = dir(atac_path)
-atac_ct = unlist(strsplit(atac,'.bed.gz'))
-ct_use = intersect(rna@active.ident,atac_ct)
+
 rna[['ct']] = as.character(rna@active.ident)
 names(atac) = atac_ct
 atac = atac[names(atac) %in% ct_use]
