@@ -10,7 +10,7 @@ plot_grn_irena = function(data){
   nodes <- nodes[!duplicated(nodes$name), ]
   colnames(data_use) <- c("from", "to", "type", "weight")
   g <- igraph::graph_from_data_frame(data_use, vertices = nodes, directed = TRUE)
-  
+
   edge.color = c('#FDD1B0','#B3B3B3')
   ### define edge color
   edge.color2 <- c()
@@ -21,7 +21,7 @@ plot_grn_irena = function(data){
       edge.color2 <- c(edge.color2,edge.color[2])
     }
   }
-  
+
   layout1 <- igraph::layout_on_grid(g)
   igraph::E(g)$arrow.size <- 0.8
   igraph::E(g)$arrow.width <- 0.5
@@ -39,7 +39,7 @@ plot_grn_irena = function(data){
     legend(x = 1.3, y = 1.3, levels(factor(igraph::V(g)$type)), pch = 21,
          col = "#777777", pt.bg = c('#E56145','#67C7C1'))
   }
-  
+
 }
 
 plot_disease_heatmap <- function(pvalues){
@@ -71,47 +71,53 @@ plot_heatmap_all <- function(ldsc_result_path='E:\\DRCTdb\\ignore\\LDSC_results/
 plot_enrich <- function(gene1){
   library(clusterProfiler)
   library(org.Hs.eg.db)
-  entrez_id <- bitr(gene1, 
-                    fromType = "SYMBOL", 
-                    toType = "ENTREZID", 
+  entrez_id <- bitr(gene1,
+                    fromType = "SYMBOL",
+                    toType = "ENTREZID",
                     OrgDb = org.Hs.eg.db)
   gene_universe <- names(org.Hs.eg.db)
-  enrich_go <- enrichGO(gene = entrez_id$ENTREZID, 
-                            keyType = 'ENTREZID', 
+  enrich_go <- enrichGO(gene = entrez_id$ENTREZID,
+                            keyType = 'ENTREZID',
                             OrgDb = org.Hs.eg.db)
   p_go = dotplot(enrich_go)
-  enrich_kegg <- enrichKEGG(gene = entrez_id$ENTREZID, 
+  enrich_kegg <- enrichKEGG(gene = entrez_id$ENTREZID,
                               organism = 'hsa',use_internal_data = T)
   p_kegg = dotplot(enrich_kegg)
   list1 = list(enrich_go,enrich_kegg)
   names(list1) = c('go','kegg')
   return(list1)
 }
-plot_main <- function(path_use,enrich=T,grn=T){
-  dir1 = dir(path_use)
+plot_main <- function(path_use='E:\\DRCTdb\\ignore\\downstream_result/'
+                      ,enrich=T,grn=F,sample_use = 'all'){
+  if (sample_use=='all') {
+    dir1 = dir(path_use)
+  }else{
+    dir1 = sample_use
+  }
+
   for (i in dir1) {
     ### kegg go plot
     if (enrich) {
-      
+
       library(ChIPseeker)
       library(TxDb.Hsapiens.UCSC.hg38.knownGene)
       txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene
       library(org.Hs.eg.db)
-      
+
       dir_rna = dir(paste0(path_use,i,'/rna_snp'))
       dir_atac = dir(paste0(path_use,i,'/atac_snp'))
       dir.create(paste0(path_use,i,'/rna_enrich_kegg'))
       dir.create(paste0(path_use,i,'/rna_enrich_go'))
       dir.create(paste0(path_use,i,'/atac_enrich_kegg'))
       dir.create(paste0(path_use,i,'/atac_enrich_go'))
-      
+
       for (j in dir_rna) {
         snp_rna = read.delim(paste0(path_use,i,'/rna_snp/',j))
         enrich_plot = plot_enrich(snp_rna$symbol)
         name_disease = unlist(strsplit(j,'.txt'))
         kegg_path = paste0(path_use,i,'/rna_enrich_kegg/',name_disease,'_kegg.svg')
         go_path = paste0(path_use,i,'/rna_enrich_go/',name_disease,'_go.svg')
-        
+
         if (dim(enrich_plot$kegg)[1]>1) {
           svg(filename = kegg_path, width = 8, height = 8)
           print(dotplot(enrich_plot$kegg))
@@ -135,15 +141,15 @@ plot_main <- function(path_use,enrich=T,grn=T){
                                              TxDb = txdb, annoDb = 'org.Hs.eg.db')
         enrich_plot = plot_enrich(peakAnno@anno$SYMBOL)
         name_disease = unlist(strsplit(j,'.txt'))
-        kegg_path = paste0(path_use,i,'/atac_enrich_kegg/',name_disease,'_kegg.tiff')
-        go_path = paste0(path_use,i,'/atac_enrich_go/',name_disease,'_go.tiff')
-        
+        kegg_path = paste0(path_use,i,'/atac_enrich_kegg/',name_disease,'_kegg.svg')
+        go_path = paste0(path_use,i,'/atac_enrich_go/',name_disease,'_go.svg')
+
         if (dim(enrich_plot$kegg)[1]>1) {
           svg(filename = kegg_path, width = 8, height = 8)
           print(dotplot(enrich_plot$kegg))
           dev.off()
         }
-        
+
         if (dim(enrich_plot$go)[1]>1) {
           svg(filename = go_path, width = 8, height = 8)
           print(dotplot(enrich_plot$go))
@@ -168,7 +174,7 @@ plot_main <- function(path_use,enrich=T,grn=T){
           print(plot_grn_irena(data))
           dev.off()
         }
-        
+
       }
       for (j in grn04_path) {
         grn_name = unlist(strsplit(j,'.txt'))
@@ -180,7 +186,7 @@ plot_main <- function(path_use,enrich=T,grn=T){
           print(plot_grn_irena(data))
           dev.off()
         }
-        
+
       }
     }
 
