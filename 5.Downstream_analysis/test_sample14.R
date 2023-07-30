@@ -24,7 +24,27 @@ dir.create(paste0(output_path,'atac_snp'))
 dir.create(paste0(output_path,'ccc'))
 ###load data & define cell type use
 rna = readRDS(rna_path)
+
 rna@active.ident=as.factor(rna$cell_type)
+cell_use = c()
+for (i in levels(as.factor(rna$cell_type))) {
+  rna_use = subset(rna,cell_type == i)
+  if (ncol(rna_use)>5000) {
+    cell_use = c(cell_use,sample(colnames(rna_use),5000))
+  }else{
+    cell_use = c(cell_use,colnames(rna_use))
+  }
+}
+rna = subset(rna,cells=cell_use)
+rna2 = rna@assays$RNA@counts
+gene_use = Converse_GeneIDSymbol(rownames(rna2),Spec1 = 'Hs')
+rna2 = rna2[gene_use[,1],]
+rownames(rna2) = as.character(gene_use[,2])
+rna2 = CreateSeuratObject(rna2)
+rna2 = NormalizeData(rna2)
+rna2$cell_type = rna$cell_type
+rna2@active.ident = as.factor(rna2$cell_type)
+rna = rna2
 atac = dir(atac_path)
 atac_ct = unlist(strsplit(atac,'.bed.gz'))
 ct_use = intersect(rna@active.ident,atac_ct)
@@ -61,14 +81,14 @@ for (i in 1:length(ct_use)) {
       rna_use = subset(rna,ct==ct_use[i])
       list1 = gwas_related_features(rna_use,atac_list[[i]],
                             disease_name=j,
-                            snp_all = snp_all,zscore_thr = 1)
+                            snp_all = snp_all,zscore_thr = 1,conver_gene = T)
 
       grn04 = ct_grn_atac(list1[[2]][,1:3],
                         unique(list1[[1]]$symbol),
-                        rna_use,cor_thr=0.4)
+                        rna_use,cor_thr=0.4,conver_gene = T)
       grn02 = ct_grn_atac(list1[[2]][,1:3],
                         unique(list1[[1]]$symbol),
-                        rna_use,cor_thr=0.2)
+                        rna_use,cor_thr=0.2,conver_gene = T)
       grn_name = paste0(ct_use[i],'_',j)
       grn_list04[[grn_name]] = grn04
       grn_list02[[grn_name]] = grn02
@@ -98,6 +118,8 @@ write.table(sig_ct_df,paste0(output_path,'disease_related_celltypes.txt'),
 source('F:\\general_code\\run_cellchat.R')
 ccc_plot_list = list()
 ccc_list = list()
+
+
 for (i in 1:length(sig_ct_list)) {
   disease_name_use = names(sig_ct_list)[i]
   related_ct = sig_ct_list[[i]]
@@ -141,10 +163,6 @@ for (i in 1:length(grn_list04)) {
   write.table(out1,paste0(output_path,'grn_cor04/',name_use,'.txt')
               ,quote = F,sep = '\t',row.names = F)
   out1$type = ifelse(out1$value>0,'positive','negative')
-  svg(filename = filenames2, width = 4, height = 4)
-  print(ccc_plot_list[[i]])
-  dev.off()
-  plot_grn(out1)
 }
 for (i in 1:length(grn_list02)) {
   name_use = names(grn_list02)[i]

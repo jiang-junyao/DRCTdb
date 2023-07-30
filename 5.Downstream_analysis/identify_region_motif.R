@@ -1,4 +1,5 @@
-ct_grn_atac <- function(peaks,gene.use,obj,cor_thr = 0.4,retina_promoter = F){
+ct_grn_atac <- function(peaks,gene.use,obj,cor_thr = 0.4,retina_promoter = F,
+                        conver_gene = F){
   ########################
   ###identify tf-target from scatac
   ########################
@@ -11,7 +12,7 @@ ct_grn_atac <- function(peaks,gene.use,obj,cor_thr = 0.4,retina_promoter = F){
                                         peaks[,3]))
 
   peak_gr = peak_anno(peaks)
-  
+
   ### find peak related motif
   PWM = readRDS('F:\\public\\Transfac_PWMatrixList.rds')
   motif1 = Tranfac201803_Hs_MotifTFsF
@@ -19,7 +20,7 @@ ct_grn_atac <- function(peaks,gene.use,obj,cor_thr = 0.4,retina_promoter = F){
   ### overlap motif and peak
   atac_out = overlap_peak_motif(peak_gr,peak_motif_gr,motif1)
   tf_target = make_tf_target(atac_out)
-  
+
   ########################
   ### integration scRNA & scATAC
   ########################
@@ -27,12 +28,20 @@ ct_grn_atac <- function(peaks,gene.use,obj,cor_thr = 0.4,retina_promoter = F){
   all_tf = unique(unlist(strsplit(motif1$TFs,';')))
   gene.use = rownames(extract_expressed_features(obj))
   rna_filter = subset(obj,features=gene.use)
-  grn = sparse.cor(t(as.matrix(rna_filter@assays$RNA@data)))
+  mt = rna_filter@assays$RNA@data
+  if (conver_gene) {
+    id = Converse_GeneIDSymbol(rownames(mt),Spec1 = 'Hs')
+    mt = mt[id[,1],]
+    rownames(mt) = id[,2]
+  }
+  grn = sparse.cor(t(as.matrix(mt)))
   grn = reshape2::melt(grn)
   grn = grn[grn[,1]%in%all_tf,]
   grn = grn[grn[,3]> cor_thr | grn[,3] < (-cor_thr),]
   grn$idx = paste0(grn[,1],'-',grn[,2])
+
   grn = grn[grn$idx %in% tf_target,]
+  return(grn)
 }
 
 extract_expressed_features <- function(obj,cells_quantile = 0.05){
@@ -50,7 +59,7 @@ peak_anno <- function(reference_GRange, tssRegion = c(-3000, 3000)) {
   txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene
   library(org.Hs.eg.db)
   annodb <- 'org.Hs.eg.db'
-  
+
   peakAnno <- ChIPseeker::annotatePeak(reference_GRange,
                                        tssRegion = tssRegion,
                                        TxDb = txdb, annoDb = annodb
@@ -83,7 +92,7 @@ peak_anno <- function(reference_GRange, tssRegion = c(-3000, 3000)) {
   peak_gr$symbol = symbol
   peak_gr$region = region2
   peak_gr$distanceToTSS = dis
-  
+
   ### filter peaks based on annotation
   peak_gr = peak_gr[peak_gr$region=='Promoter']
   return(peak_gr)
@@ -123,7 +132,7 @@ Must_to_GR <- function(x){
   chr_all = as.character(unlist(chr_all))
   start_all = as.numeric(unlist(start_all))
   end_all = as.numeric(unlist(end_all))
-  ##### ##### 
+  ##### #####
   names_all = rep(names(x),len_all)
   GR_out = GRanges(chr_all,IRanges(start_all,end_all),motifs=names_all)
   return(GR_out)
