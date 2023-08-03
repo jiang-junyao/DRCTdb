@@ -61,7 +61,7 @@ plot_heatmap_all <- function(ldsc_result_path='E:\\DRCTdb\\ignore\\LDSC_results/
     pvalue = read.delim(paste0(ldsc_result_path,i,'/pvalues.tsv'))
     out_path = paste0(output_path,i,'/ldsc_heatmap.tiff')
     out_path2 = paste0(output_path,i,'/ldsc_heatmap.svg')
-    svg(filename = out_path2, width = 12, height = 10)
+    svg(filename = out_path2, width = 20, height = 12)
     print(plot_disease_heatmap(pvalue))
     dev.off()
   }

@@ -110,7 +110,8 @@ for (i in 1:length(sig_ct_list)) {
   disease_name_use = names(sig_ct_list)[i]
   related_ct = sig_ct_list[[i]]
   rna_ct = ct_table[ct_table[,1] %in% related_ct,2]
-  if (length(related_ct)>1) {
+  rna_ct = unique(rna_ct)
+  if (length(rna_ct)>1) {
     rna_use = subset(rna,ct %in% rna_ct)
     ccc = run_cellchat(rna_use,rna_use@meta.data,group = 'ct',species = 'hs')
     groupSize <- as.numeric(table(ccc@idents))
@@ -122,6 +123,9 @@ for (i in 1:length(sig_ct_list)) {
     ### disease related ccc
     ccc_plot_list[[i]] = p1
     ccc_list[[i]] = ccc
+  }else{
+    ccc_plot_list[[i]] = NULL
+    ccc_list[[i]] = NULL
   }
 }
 

@@ -113,8 +113,11 @@ for (i in 1:length(sig_ct_list)) {
                           title.name = "",vertex.label.cex = 0.7)
     print(disease_name_use)
     ### disease related ccc
-    ccc_plot_list[[i]] = p1
-    ccc_list[[i]] = ccc
+    ccc_plot_list[[disease_name_use]] = p1
+    ccc_list[[disease_name_use]] = ccc
+  }else{
+    ccc_plot_list[[disease_name_use]] = NULL
+    ccc_list[[disease_name_use]] = NULL
   }
 }
 
