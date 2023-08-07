@@ -2,8 +2,13 @@
 gwas_related_features <- function(rna_use,atac_use,snp_all,
                                   gwas_path='E:\\DRCTdb\\ignore\\LDSC_hg38/',
                                   disease_name,
-                                  zscore_thr = 2){
+                                  zscore_thr = 2,conver_gene=F){
   rna_features = rownames(extract_expressed_features(rna_use,cells_quantile = 0.1))
+  if (conver_gene) {
+    library(IReNA)
+    rna_features=Converse_GeneIDSymbol(rna_features,Spec1 = 'Hs')[,2]
+    rna_features=unique(rna_features)
+  }
   atac_features = gsub('chr','',atac_use)
   peak_gr = GenomicRanges::GRanges(atac_features)
   gene_tss = readRDS('E:\\public/hg38_gene_tss.rds')
@@ -17,7 +22,7 @@ gwas_related_features <- function(rna_use,atac_use,snp_all,
   gene_overlap = overlap_gwas(gene_gr,gwas_path = gwas_path
                               ,snp_all = snp_all,disease_name = disease_name,
                               zscore_thr = zscore_thr)
-  
+
   peak_overlap = overlap_gwas(peak_gr,gwas_path = gwas_path
                               ,snp_all = snp_all,disease_name = disease_name,
                               zscore_thr = zscore_thr)
@@ -42,11 +47,11 @@ overlap_gwas <- function(peak_gr,gwas_path = 'E:\\DRCTdb\\ignore\\LDSC_hg38/',
   disease_all = dir(josh_path)
   disease_all_name = as.data.frame(t(as.data.frame(strsplit(disease_all,'\\.'))))
   names(disease_all) = disease_all_name[,4]
-  
+
   gwas_file = disease_all[disease_name]
   print(gwas_file)
   gwas_file = read.delim(paste0(josh_path,gwas_file))
-  
+
   gwas_file = gwas_file[!is.na(gwas_file[,5]),]
   gwas_file = gwas_file[gwas_file$Z > zscore_thr | gwas_file$Z < (-zscore_thr),]
   snp_use = intersect(gwas_file$SNP,snp_all$snp)

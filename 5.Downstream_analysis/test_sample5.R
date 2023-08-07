@@ -6,17 +6,17 @@ source('identify_region_motif.R')
 source('overlap_gwas.R')
 source('plot.R')
 ### path need to define
-output_path = 'E:\\DRCTdb\\ignore\\downstream_result\\sample14\\'
-rna_path = 'F:\\DRCTdb\\ignore\\scRNA-seq\\sample14\\sample14_processed_300k_scRNA-seq(2).Rds'
-atac_path = 'E:\\DRCTdb\\ignore\\bed\\sample14/'
-ldsc_path = "E:/DRCTdb/ignore/LDSC_results/sample14/pvalues.tsv"
+output_path = 'E:\\DRCTdb\\ignore\\downstream_result\\sample5\\'
+rna_path = 'F:\\DRCTdb\\ignore\\scRNA-seq\\Sample6\\seurat.rds'
+atac_path = 'E:\\DRCTdb\\ignore\\bed\\sample5/'
+ldsc_path = "E:/DRCTdb/ignore/LDSC_results/sample5/pvalues.tsv"
 #### db path
 
 snp_path = 'E:\\public\\all_snp_info_gr.Rds'
 disease_path = 'E:\\DRCTdb\\ignore\\LDSC_hg38\\summary_statistics\\Josh'
 source('F:\\general_code\\run_cellchat.R')
 ### create output folder
-
+dir.create(paste0(output_path))
 dir.create(paste0(output_path,'grn_cor04'))
 dir.create(paste0(output_path,'grn_cor02'))
 dir.create(paste0(output_path,'rna_snp'))
@@ -24,31 +24,18 @@ dir.create(paste0(output_path,'atac_snp'))
 dir.create(paste0(output_path,'ccc'))
 ###load data & define cell type use
 rna = readRDS(rna_path)
+rna = NormalizeData(rna)
+ct = as.character(rna$annotation)
+ct_table = read.delim('F:\\DRCTdb\\ignore\\scRNA-seq\\Sample6\\ct.txt',header = F)
 
-rna@active.ident=as.factor(rna$cell_type)
-cell_use = c()
-for (i in levels(as.factor(rna$cell_type))) {
-  rna_use = subset(rna,cell_type == i)
-  if (ncol(rna_use)>5000) {
-    cell_use = c(cell_use,sample(colnames(rna_use),5000))
-  }else{
-    cell_use = c(cell_use,colnames(rna_use))
-  }
-}
-rna = subset(rna,cells=cell_use)
-rna2 = rna@assays$RNA@counts
-gene_use = Converse_GeneIDSymbol(rownames(rna2),Spec1 = 'Hs')
-rna2 = rna2[gene_use[,1],]
-rownames(rna2) = as.character(gene_use[,2])
-rna2 = CreateSeuratObject(rna2)
-rna2 = NormalizeData(rna2)
-rna2$cell_type = rna$cell_type
-rna2@active.ident = as.factor(rna2$cell_type)
-rna = rna2
+rna[['ct']] = as.character(rna$annotation)
+rna@active.ident = as.factor(rna$ct)
+rna = subset(rna,annotation %in% ct_table$V2)
 atac = dir(atac_path)
 atac_ct = unlist(strsplit(atac,'.bed.gz'))
-ct_use = intersect(rna@active.ident,atac_ct)
-rna[['ct']] = as.character(rna@active.ident)
+ct_use = atac_ct[atac_ct %in% ct_table$V1]
+
+
 names(atac) = atac_ct
 atac = atac[names(atac) %in% ct_use]
 atac_list = list()
@@ -78,17 +65,18 @@ for (i in 1:length(ct_use)) {
   disease_use = unique(disease_use)
   disease_use = intersect(disease_use,names(disease_all))
   for (j in disease_use) {
-      rna_use = subset(rna,ct==ct_use[i])
+      rna_ct = ct_table[ct_table[,1]==ct_use[i],2]
+      rna_use = subset(rna,ct==rna_ct)
       list1 = gwas_related_features(rna_use,atac_list[[i]],
                             disease_name=j,
-                            snp_all = snp_all,zscore_thr = 1,conver_gene = T)
+                            snp_all = snp_all,zscore_thr = 1)
 
       grn04 = ct_grn_atac(list1[[2]][,1:3],
                         unique(list1[[1]]$symbol),
-                        rna_use,cor_thr=0.4,conver_gene = T)
+                        rna_use,cor_thr=0.4)
       grn02 = ct_grn_atac(list1[[2]][,1:3],
                         unique(list1[[1]]$symbol),
-                        rna_use,cor_thr=0.2,conver_gene = T)
+                        rna_use,cor_thr=0.2)
       grn_name = paste0(ct_use[i],'_',j)
       grn_list04[[grn_name]] = grn04
       grn_list02[[grn_name]] = grn02
@@ -118,13 +106,13 @@ write.table(sig_ct_df,paste0(output_path,'disease_related_celltypes.txt'),
 source('F:\\general_code\\run_cellchat.R')
 ccc_plot_list = list()
 ccc_list = list()
-
-
 for (i in 1:length(sig_ct_list)) {
   disease_name_use = names(sig_ct_list)[i]
   related_ct = sig_ct_list[[i]]
-  if (length(related_ct)>1) {
-    rna_use = subset(rna,ct %in% related_ct)
+  rna_ct = ct_table[ct_table[,1] %in% related_ct,2]
+  rna_ct = unique(rna_ct)
+  if (length(rna_ct)>1) {
+    rna_use = subset(rna,ct %in% rna_ct)
     ccc = run_cellchat(rna_use,rna_use@meta.data,group = 'ct',species = 'hs')
     groupSize <- as.numeric(table(ccc@idents))
     par(mfrow=c(1,1))
@@ -135,6 +123,9 @@ for (i in 1:length(sig_ct_list)) {
     ### disease related ccc
     ccc_plot_list[[i]] = p1
     ccc_list[[i]] = ccc
+  }else{
+    ccc_plot_list[[i]] = NULL
+    ccc_list[[i]] = NULL
   }
 }
 
@@ -163,6 +154,10 @@ for (i in 1:length(grn_list04)) {
   write.table(out1,paste0(output_path,'grn_cor04/',name_use,'.txt')
               ,quote = F,sep = '\t',row.names = F)
   out1$type = ifelse(out1$value>0,'positive','negative')
+  svg(filename = filenames2, width = 4, height = 4)
+  print(ccc_plot_list[[i]])
+  dev.off()
+  plot_grn(out1)
 }
 for (i in 1:length(grn_list02)) {
   name_use = names(grn_list02)[i]
