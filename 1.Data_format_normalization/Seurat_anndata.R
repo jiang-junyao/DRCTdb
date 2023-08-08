@@ -50,8 +50,137 @@ sample7_ATAC <- CreateSeuratObject(
   assay = "peaks",
   meta.data = as.data.frame(sample7_mtx@colData)
 )
-
 saveRDS(sample7_ATAC,file = '../../data/scATAC-seq/Sample7/sample7_scATAC-seq_50k_processed.Rds')
-
 sceasy::convertFormat(sample7_ATAC, from="seurat", to="anndata",assay = 'peaks',
                       outFile='../../data/scATAC-seq/sample7/sample7_scATAC-seq_50k_processed.h5ad')
+#sample8----
+sample8_ATAC <- readRDS('../../data/scATAC-seq/Sample8/sample8_peak_matrix.Rds')
+sparse_mtx <- sample8_ATAC@assays@data$PeakMatrix
+rownames(sparse_mtx) <- paste(as.data.frame(sample8_ATAC@rowRanges)[[1]],as.data.frame(sample8_ATAC@rowRanges)[[2]],as.data.frame(sample8_ATAC@rowRanges)[[3]],sep = '-')
+metadata <- read.csv('../../data/scATAC-seq/Sample8/atac_barcodes.csv')
+cell_type_list <- map(str_extract(colnames(sparse_mtx),'(?<=#)[A-Z]+'),get_celltype)
+cell_type <- unlist(cell_type_list)
+sample8_ATAC$cell_type <- cell_type
+
+chrom_assay <- CreateChromatinAssay(
+  counts = sparse_mtx,
+  sep = c("-", "-"),
+  genome = 'hg38',
+  min.cells = 10,
+  min.features = 200
+)
+sample8_ATAC <- CreateSeuratObject(
+  counts = chrom_assay,
+  assay = "peaks",
+  meta.data = as.data.frame(sample8_ATAC@colData)
+)
+saveRDS(sample8_ATAC,file = '../../data/scATAC-seq/Sample8/sample8_scATAC-seq_100k_processed.Rds')
+sceasy::convertFormat(sample8_ATAC, from="seurat", to="anndata",assay = 'peaks',
+                      outFile='../../data/scATAC-seq/sample8/sample8_scATAC-seq_100k_processed.h5ad')
+#sample10----
+sample10_ATAC <- readRDS('../../data/scATAC-seq/Sample10/sample10_peak_matrix.Rds')
+sparse_mtx <- sample10_ATAC@assays@data$PeakMatrix
+rownames(sparse_mtx) <- paste(as.data.frame(sample10_ATAC@rowRanges)[[1]],as.data.frame(sample10_ATAC@rowRanges)[[2]],as.data.frame(sample10_ATAC@rowRanges)[[3]],sep = '-')
+sparse_mtx <- sparse_mtx[which(map_vec(rownames(sparse_mtx),subset_peaks)),]
+
+chrom_assay <- CreateChromatinAssay(
+  counts = sparse_mtx,
+  sep = c("-", "-"),
+  genome = 'hg38',
+  min.cells = 10,
+  min.features = 200
+)
+sample10_ATAC <- CreateSeuratObject(
+  counts = chrom_assay,
+  assay = "peaks",
+  meta.data = as.data.frame(sample10_ATAC@colData)
+)
+sample10_ATAC$cell_type <- str_replace(sample10_ATAC$cell_type,'\\+','_high')
+sample10_ATAC$cell_type <- str_replace_all(sample10_ATAC$cell_type,'/','_')
+sample10_ATAC$cell_type <- str_replace_all(sample10_ATAC$cell_type,' ','_')
+sample10_ATAC$cell_type <- str_replace_all(sample10_ATAC$cell_type,'[.]','')
+saveRDS(sample10_ATAC,file = '../../data/scATAC-seq/Sample10/sample10_scATAC-seq_95k_processed.Rds')
+sceasy::convertFormat(sample10_ATAC, from="seurat", to="anndata",assay = 'peaks',
+                      outFile='../../data/scATAC-seq/sample10/sample10_scATAC-seq_95k_processed.h5ad')
+#sample11----
+sample11_ATAC <- readRDS('../../data/scATAC-seq/Sample11/Sample11_peak_matrix.Rds')
+sample11_ATAC@colData$barcode <- rownames(sample11_ATAC@colData)
+sample11_ATAC@colData$barcode <- str_extract(sample11_ATAC@colData$barcode,'(?<=#).*')
+coldata <- as.data.frame(sample11_ATAC@colData)
+coldata$raw_barcode <- rownames(coldata)
+sparse_mtx <- sample11_ATAC@assays@data$PeakMatrix
+rownames(sparse_mtx) <- paste(as.data.frame(sample11_ATAC@rowRanges)[[1]],as.data.frame(sample11_ATAC@rowRanges)[[2]],as.data.frame(sample11_ATAC@rowRanges)[[3]],sep = '-')
+sparse_mtx <- sparse_mtx[which(map_vec(rownames(sparse_mtx),subset_peaks)),]
+
+metadata <- readRDS('../../data/scATAC-seq/Sample11/meta.rds')
+metadata$barcode <- rownames(metadata)
+metadata$barcode <- str_replace(metadata$barcode,'h_Donor','hr_Donor')
+
+coldata <- coldata %>% left_join(metadata,by = 'barcode')
+coldata$cell_type <- coldata$pairedLabel
+
+coldata2 <- coldata[which(!is.na(coldata$cell_type)),]
+sparse_mtx <- sparse_mtx[,which(!is.na(coldata$cell_type))]
+identical(colnames(sparse_mtx),coldata2$raw_barcode)
+chrom_assay <- CreateChromatinAssay(
+  counts = sparse_mtx,
+  sep = c("-", "-"),
+  genome = 'hg38',
+  min.cells = 10,
+  min.features = 200
+)
+sample11_ATAC <- CreateSeuratObject(
+  counts = chrom_assay,
+  assay = "peaks",
+  meta.data = as.data.frame(coldata2)
+)
+saveRDS(sample11_ATAC,file = '../../data/scATAC-seq/Sample11/sample11_scATAC-seq_17k_processed.Rds')
+sceasy::convertFormat(sample11_ATAC, from="seurat", to="anndata",assay = 'peaks',
+                      outFile='../../data/scATAC-seq/sample11/sample11_scATAC-seq_17k_processed.h5ad')
+#sample12----
+sample12_ATAC <- readRDS('../../data/scATAC-seq/Sample12/Sample12_ATAC-seq.Rds')
+sample12_ATAC$cell_type <- str_replace_all(sample12_ATAC$cell_type,' ','_')
+sample12_ATAC$cell_type <- str_replace_all(sample12_ATAC$cell_type,'/','')
+sceasy::convertFormat(sample12_ATAC, from="seurat", to="anndata",assay = 'peaks',
+                      outFile='../../data/scATAC-seq/sample12/sample12_scATAC-seq_104k_processed.h5ad')
+#sample13----
+sample13_RNA <- readRDS('../../data/scRNA-seq/Sample13/sample13_Bone_marrow_8k.Rds')
+sample13_ATAC <- readRDS('../../data/scATAC-seq/Sample13/sample13_Bone_marrow_ATAC_4k_processed.Rds.rds')
+sample13_ATAC$cell_type <- sample13_ATAC$predicted.id 
+saveRDS(sample13_ATAC,'../../data/scATAC-seq/Sample13/sample13_Bone_marrow_ATAC_4k_processed.Rds')
+sceasy::convertFormat(sample13_ATAC, from="seurat", to="anndata",assay = 'peaks',
+                      outFile='../../data/scATAC-seq/sample13/sample13_scATAC-seq_4k_processed.h5ad')
+
+
+#sample14----
+sample14_ATAC <- readRDS('../../data/scATAC-seq/sample14/sample14_processed_95k_scATAC.Rds')
+sceasy::convertFormat(sample14_ATAC, from="seurat", to="anndata",assay = 'peaks',
+                      outFile='../../data/scATAC-seq/sample14/sample14_scATAC-seq_95k_processed.h5ad')
+
+#sample16----
+sample16_ATAC <- readRDS('../../data/scATAC-seq/sample16/sample16_Bone_marrow_ATAC_Healthy_35k_processed.Rds')
+sceasy::convertFormat(sample16_ATAC, from="seurat", to="anndata",assay = 'peaks',
+                      outFile='../../data/scATAC-seq/sample16/sample16_scATAC-seq_35k_processed.h5ad')
+#sample23----
+sample23_ATAC <- readRDS('../../data/scATAC-seq/sample23/islet_multiome_seurat_singac.Rds')
+DefaultAssay(sample23_ATAC) <- 'ATAC'
+sparse_mtx <- sample23_ATAC@assays$ATAC@counts
+chrom_assay <- CreateChromatinAssay(
+  counts = sparse_mtx,
+  sep = c("-", "-"),
+  genome = 'hg38',
+  min.cells = 10,
+  min.features = 200
+)
+sample23_ATAC <- CreateSeuratObject(
+  counts = chrom_assay,
+  assay = "peaks",
+  meta.data = as.data.frame(sample23_ATAC@meta.data)
+)
+
+sceasy::convertFormat(sample23_ATAC, from="seurat", to="anndata",assay = DefaultAssay(sample23_ATAC),
+                      outFile='../../data/scATAC-seq/sample23/sample23_scATAC-seq_95k_processed.h5ad')
+#sample24----
+sample24_ATAC <- readRDS('../../data/scATAC-seq/Sample24/sample24_scATAC-seq_100k_healthy_processed.Rds')
+sceasy::convertFormat(sample24_ATAC, from="seurat", to="anndata",assay = 'peaks',
+                      outFile='../../data/scATAC-seq/sample24/sample24_scATAC-seq_52k_processed.h5ad')
