@@ -18,7 +18,18 @@ find_DBRs <- function(obj,test_method = 'wilcox'){
   DBRs_gr$log2fc <- DBRs$avg_log2FC
   return(DBRs_gr)
 }
-
+get_celltype <- function(x){
+  res <- metadata[str_which(metadata$barcode,x),]$celltype
+  if (length(res) > 1) {
+    res <- unique(res)
+    if (length(res) > 1) {
+      res <- 'Unknown'
+    }
+  }else if(length(res) ==0 ){
+    res <- 'Unknown'
+  }
+  return(res)
+}
 #Only select peaks fomart as chrxx-xx-xxx
 subset_peaks <- function(x){
   if (length(str_extract_all(x,'-')[[1]])== 2) {
