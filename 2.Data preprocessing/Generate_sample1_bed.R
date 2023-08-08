@@ -5,6 +5,9 @@ library(Matrix)
 library(glue)
 source('preprocess_functions.R')
 sample1_ATAC <- readRDS('../../data/scATAC-seq/sample1/Rds/sample1_scATAC-seq_80k_processed.Rds')
+dior::seurat_write_h5(sample1_ATAC, file='../../data/scATAC-seq/sample1/Rds/sample1_scATAC-seq_80k_processed.h5',assay.name = DefaultAssay(sample1_ATAC),save.graphs = F)
+
+
 
 sparse_mtx <- sample1_ATAC@assays$peaks@counts
 sparse_mtx <- sparse_mtx[str_starts(rownames(sparse_mtx),'chr'),]
@@ -37,4 +40,3 @@ for (i in 1:length(cell_gr_list)) {
   rtracklayer::export.bed(object = cell_gr_list[[i]],con = filenames)
   cat(names(cell_gr_list)[i],'\n')
 }
-
