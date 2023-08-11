@@ -223,3 +223,6 @@ peak_matrix <- getMatrixFromProject(
   binarize = FALSE
 )
 saveRDS(peak_matrix,file = 'Sample26_peak_matrix.Rds')
+
+
+
