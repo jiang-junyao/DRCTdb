@@ -5,6 +5,9 @@ library(Matrix)
 library(glue)
 source('preprocess_functions.R')
 sample26_ATAC <- readRDS('../../data/scATAC-seq/Sample26/Sample26_peak_matrix.Rds')
+sample26_ATAC$cell_type <- str_replace_all(sample26_ATAC$cell_type,' ','_')
+sample26_ATAC$cell_type <- str_replace_all(sample26_ATAC$cell_type,'CD4.M','CD4_Memory')
+
 sparse_mtx <- sample26_ATAC@assays@data$PeakMatrix
 rownames(sparse_mtx) <- paste(as.data.frame(sample26_ATAC@rowRanges)[[1]],as.data.frame(sample26_ATAC@rowRanges)[[2]],as.data.frame(sample26_ATAC@rowRanges)[[3]],sep = '-')
 sparse_mtx <- sparse_mtx[which(map_vec(rownames(sparse_mtx),subset_peaks)),]
