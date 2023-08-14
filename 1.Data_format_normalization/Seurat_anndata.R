@@ -57,10 +57,6 @@ sceasy::convertFormat(sample7_ATAC, from="seurat", to="anndata",assay = 'peaks',
 sample8_ATAC <- readRDS('../../data/scATAC-seq/Sample8/sample8_peak_matrix.Rds')
 sparse_mtx <- sample8_ATAC@assays@data$PeakMatrix
 rownames(sparse_mtx) <- paste(as.data.frame(sample8_ATAC@rowRanges)[[1]],as.data.frame(sample8_ATAC@rowRanges)[[2]],as.data.frame(sample8_ATAC@rowRanges)[[3]],sep = '-')
-metadata <- read.csv('../../data/scATAC-seq/Sample8/atac_barcodes.csv')
-cell_type_list <- map(str_extract(colnames(sparse_mtx),'(?<=#)[A-Z]+'),get_celltype)
-cell_type <- unlist(cell_type_list)
-sample8_ATAC$cell_type <- cell_type
 
 chrom_assay <- CreateChromatinAssay(
   counts = sparse_mtx,
@@ -104,24 +100,12 @@ sceasy::convertFormat(sample10_ATAC, from="seurat", to="anndata",assay = 'peaks'
                       outFile='../../data/scATAC-seq/sample10/sample10_scATAC-seq_95k_processed.h5ad')
 #sample11----
 sample11_ATAC <- readRDS('../../data/scATAC-seq/Sample11/Sample11_peak_matrix.Rds')
-sample11_ATAC@colData$barcode <- rownames(sample11_ATAC@colData)
-sample11_ATAC@colData$barcode <- str_extract(sample11_ATAC@colData$barcode,'(?<=#).*')
-coldata <- as.data.frame(sample11_ATAC@colData)
-coldata$raw_barcode <- rownames(coldata)
+
 sparse_mtx <- sample11_ATAC@assays@data$PeakMatrix
 rownames(sparse_mtx) <- paste(as.data.frame(sample11_ATAC@rowRanges)[[1]],as.data.frame(sample11_ATAC@rowRanges)[[2]],as.data.frame(sample11_ATAC@rowRanges)[[3]],sep = '-')
 sparse_mtx <- sparse_mtx[which(map_vec(rownames(sparse_mtx),subset_peaks)),]
 
-metadata <- readRDS('../../data/scATAC-seq/Sample11/meta.rds')
-metadata$barcode <- rownames(metadata)
-metadata$barcode <- str_replace(metadata$barcode,'h_Donor','hr_Donor')
 
-coldata <- coldata %>% left_join(metadata,by = 'barcode')
-coldata$cell_type <- coldata$pairedLabel
-
-coldata2 <- coldata[which(!is.na(coldata$cell_type)),]
-sparse_mtx <- sparse_mtx[,which(!is.na(coldata$cell_type))]
-identical(colnames(sparse_mtx),coldata2$raw_barcode)
 chrom_assay <- CreateChromatinAssay(
   counts = sparse_mtx,
   sep = c("-", "-"),
@@ -132,11 +116,11 @@ chrom_assay <- CreateChromatinAssay(
 sample11_ATAC <- CreateSeuratObject(
   counts = chrom_assay,
   assay = "peaks",
-  meta.data = as.data.frame(coldata2)
+  meta.data = as.data.frame(sample11_ATAC@metadata)
 )
-saveRDS(sample11_ATAC,file = '../../data/scATAC-seq/Sample11/sample11_scATAC-seq_17k_processed.Rds')
+saveRDS(sample11_ATAC,file = '../../data/scATAC-seq/Sample11/sample11_scATAC-seq_24k_processed.Rds')
 sceasy::convertFormat(sample11_ATAC, from="seurat", to="anndata",assay = 'peaks',
-                      outFile='../../data/scATAC-seq/sample11/sample11_scATAC-seq_17k_processed.h5ad')
+                      outFile='../../data/scATAC-seq/sample11/sample11_scATAC-seq_24k_processed.h5ad')
 #sample12----
 sample12_ATAC <- readRDS('../../data/scATAC-seq/Sample12/Sample12_ATAC-seq.Rds')
 sample12_ATAC$cell_type <- str_replace_all(sample12_ATAC$cell_type,' ','_')
