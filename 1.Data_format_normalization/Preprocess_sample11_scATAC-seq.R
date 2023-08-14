@@ -1,4 +1,5 @@
 library(ArchR)
+library(BSgenome.Hsapiens.UCSC.hg19)
 setwd('.')
 addArchRThreads(threads = 1) 
 addArchRGenome("hg19")
@@ -65,6 +66,38 @@ sample11 <- addReproduciblePeakSet(
 )
 sample11 <- addPeakMatrix(sample11)
 saveArchRProject(ArchRProj = sample11, outputDirectory = "sample11_archR", load = TRUE)
+setwd('../../data/scATAC-seq/Sample11/')
+sample11 <- loadArchRProject('sample11_archR')
+
+
+metadata <- readRDS('meta.rds')
+metadata$barcode <- rownames(metadata)
+metadata$barcode <- str_replace(metadata$barcode,'h_Donor','hr_Donor')
+
+coldata <- as.data.frame(sample11@cellColData)
+coldata$raw_barcode <- rownames(coldata)
+coldata$barcode <- str_extract(coldata$raw_barcode,'(?<=#).*')
+
+coldata <- coldata %>% left_join(metadata,by = 'barcode')
+coldata$cell_type <- coldata$pairedLabel
+
+sample11 <- addCellColData(sample11,data = coldata$cell_type,name = 'cell_type',cells =coldata$raw_barcode )
+
+
+sample11 <- addGroupCoverages(ArchRProj = sample11,
+                              groupBy = "cell_type",
+                              minCells = 100,
+                              maxCells = 3000,
+                              force = T)
+sample11 <- addReproduciblePeakSet(
+  ArchRProj = sample11, 
+  groupBy = "cell_type", 
+  pathToMacs2 = '/home/kyh/miniconda3/envs/deeptools/bin/macs2',
+  force =T,
+)
+sample11 <- addPeakMatrix(sample11)
+saveArchRProject(ArchRProj = sample11, outputDirectory = "sample11_archR", load = TRUE)
+
 
 
 peak_matrix <- getMatrixFromProject(
