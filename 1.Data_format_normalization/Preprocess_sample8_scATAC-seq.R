@@ -1,5 +1,6 @@
 library(ArchR)
-setwd('sample8/')
+library(BSgenome.Hsapiens.UCSC.hg38)
+setwd('../../data/scATAC-seq/Sample8/')
 addArchRThreads(threads = 1) 
 addArchRGenome("hg38")
 inputFiles <- list.files('./fragment',pattern = '*.gz$',full.names = T)
@@ -54,20 +55,40 @@ sample8 <- addUMAP(
   metric = "cosine",
   force =T
 )
+sample8 <- loadArchRProject('sample8_archR')
+
+metadata <- read.csv('atac_barcodes.csv')
+
+get_celltype <- function(x){
+  res <- metadata[str_which(metadata$barcode,x),]$celltype
+  if (length(res) > 1) {
+    res <- unique(res)
+    if (length(res) > 1) {
+      res <- 'Unknown'
+    }
+  }else if(length(res) ==0 ){
+    res <- 'Unknown'
+  }
+  return(res)
+}
+
+cell_type <- purrr::map_chr(str_extract(sample8$cellNames,'(?<=#)[A-Z]+'),get_celltype,.progress = T)
+sample8 <- addCellColData(sample8,data = cell_type,name = 'cell_type',cells = sample8$cellNames)
+
+sample8 <- sample8[sample8$cell_type != 'Unknown',]
 
 sample8 <- addGroupCoverages(ArchRProj = sample8,
-                              groupBy = "Sample",
-                              minCells = 300,
-                              maxCells = 30000,
-                              force = TRUE)
+                             groupBy = "cell_type",
+                             minCells = 300,
+                             maxCells = 30000,
+                             force = TRUE)
 sample8 <- addReproduciblePeakSet(
   ArchRProj = sample8, 
-  groupBy = "Sample", 
+  groupBy = "cell_type", 
   pathToMacs2 = '/home/kyh/miniconda3/envs/deeptools/bin/macs2',
   force =T,
 )
 sample8 <- addPeakMatrix(sample8)
-metadata <- sample8@cellColData |> as.data.frame()
 saveArchRProject(ArchRProj = sample8, outputDirectory = "sample8_archR", load = TRUE)
 
 
