@@ -1,24 +1,22 @@
 library(Seurat)
 library(igraph)
 library(GenomicRanges)
-library(stringr)
-library(IReNA)
 setwd('E:\\DRCTdb\\5.Downstream_analysis')
 source('identify_region_motif.R')
 source('overlap_gwas.R')
 source('plot.R')
 ### path need to define
-output_path = 'E:\\DRCTdb\\ignore\\downstream_result\\sample8\\'
-rna_path = 'F:\\DRCTdb\\ignore\\scRNA-seq\\sample8\\sample8_scRNA_processed_68k.Rds'
-atac_path = 'E:\\DRCTdb\\ignore\\bed\\sample8/'
-ldsc_path = "E:/DRCTdb/ignore/LDSC_results/sample8/pvalues.tsv"
+output_path = 'E:\\DRCTdb\\ignore\\downstream_result\\sample10\\'
+rna_path = 'F:\\DRCTdb\\ignore\\scRNA-seq\\Sample10\\seurat.rds'
+atac_path = 'E:\\DRCTdb\\ignore\\bed\\sample10/'
+ldsc_path = "E:/DRCTdb/ignore/LDSC_results/sample10/pvalues.tsv"
 #### db path
 
 snp_path = 'E:\\public\\all_snp_info_gr.Rds'
 disease_path = 'E:\\DRCTdb\\ignore\\LDSC_hg38\\summary_statistics\\Josh'
 source('F:\\general_code\\run_cellchat.R')
 ### create output folder
-
+dir.create(paste0(output_path))
 dir.create(paste0(output_path,'grn_cor04'))
 dir.create(paste0(output_path,'grn_cor02'))
 dir.create(paste0(output_path,'rna_snp'))
@@ -26,38 +24,62 @@ dir.create(paste0(output_path,'atac_snp'))
 dir.create(paste0(output_path,'ccc'))
 ###load data & define cell type use
 rna = readRDS(rna_path)
+ct = as.character(rna$new_celltype)
+ct = gsub(' ','_',ct)
+ct = gsub('aDC_1','aDC',ct)
+ct = gsub('aDC_2','aDC',ct)
+ct = gsub('AT1','AT1_AT2',ct)
+ct = gsub('AT2','AT1_AT2',ct)
+ct = gsub('Late_airway_SMC','Airway_SMC',ct)
+ct = gsub('Mid_airway_SMC_1','Airway_SMC',ct)
+ct = gsub('Mid_airway_SMC_2','Airway_SMC',ct)
+ct = gsub('Proximal_basal','Basal',ct)
+ct = gsub('Late_basal','Basal',ct)
+ct = gsub('Mid_basal','Basal',ct)
+ct = gsub('CD16+_NK','CD16_high_NK',ct)
+ct = gsub('CD5-_Mature_B','CD5-_mature_B',ct)
+ct = gsub('CD5+_CCL22-_mature_B','CD5_high_mature_B',ct)
+ct = gsub('CD5+_CCL22+_mature_B','CD5_high_mature_B',ct)
+ct = gsub('CX3CR1+_M桅','CX3CR1_high_Mac',ct)
+ct = gsub('CDefinitive_erythrocyte','Def_ery"',ct)
+ct = gsub('Early_mesothelial','Early_meso"',ct)
+ct = gsub('GHRL+_neuroendocrine','GHRL_high_NE',ct)
+ct = gsub('Th17','ILC3_Th17',ct)
+ct = gsub('ILC3','ILC3_Th17',ct)
+ct = gsub('Intermediate_lymphatic_endo','Interm_lymphatic_endo',ct)
+ct = gsub('Megakaryocyte','Megk',ct)
+ct = gsub('Mid_mesothelial','Mid_late_meso',ct)
+ct = gsub('Late_mesothelial','Mid_late_meso',ct)
+ct = gsub('Promonocyte-like','Monocyte',ct)
+ct = gsub('Myofibro_3','Myofibro',ct)
+ct = gsub('Myofibro_2','Myofibro',ct)
+ct = gsub('Myofibro_1','Myofibro',ct)
+ct = gsub('PCP4+_neuron','Neuron',ct)
+ct = gsub('MFNG+_DBH+_neuron','Neuron',ct)
+ct = gsub('TM4SF4+_CHODL+_neuron','Neuron',ct)
+ct = gsub('KCNIP4+_neuron','Neuron',ct)
+ct = gsub('TM4SF4+_PENK+_neuron','Neuron',ct)
+ct = gsub('NKT1','NKT',ct)
+ct = gsub('NKT2','NKT',ct)
+ct = gsub('Primitive_erythrocyte','Pri_ery',ct)
+ct = gsub('Pulmonary_neuroendocrine','Pulmonary_NE',ct)
+ct = gsub('Early_Schwann','Schwann',ct)
+ct = gsub('Late_Schwann','Schwann',ct)
+ct = gsub('Proximal_secretory_2','Secretory_1_2',ct)
+ct = gsub('Proximal_secretory_3','Secretory_1_2',ct)
+ct = gsub('Proximal_secretory_1','Secretory_1_2',ct)
+ct = gsub('魏_small_pre-B','Small_pre-B',ct)
+ct = gsub('Vascular_SMC_1','Vascular_SMC',ct)
+ct = gsub('Vascular_SMC_2','Vascular_SMC',ct)
 
-ct1 = as.character(rna$cell_type)
-ct1 = gsub('endothelial cell','ENDO',ct1)
-ct1 = gsub('B cell','BCELL',ct1)
-ct1 = gsub('T cell','TCELL',ct1)
-ct1 = gsub('podocyte','PCT',ct1)
-ct1 = gsub('parietal epithelial cell','PEC',ct1)
-ct1 = gsub('fibroblast','FIB_VSMC_MC',ct1)
-ct1 = gsub('mononuclear cell','MONO',ct1)
-ct1 = gsub('renal principal cell','PC',ct1)
-rna[['ct1']] = ct1
-
-rna@active.ident=as.factor(rna$ct1)
-
-
-if (str_sub(rownames(rna)[1],1,3)=='ENS') {
-  gene1 = Converse_GeneIDSymbol(rownames(rna),Spec1 = 'Hs')
-  rna = subset(rna,features=gene1[,1])
-  rna2 = rna@assays$RNA@counts
-  rownames(rna2) = gene1[,2]
-  rna2 = CreateSeuratObject(rna2)
-  rna2 = NormalizeData(rna2)
-  rna2[['ct1']] = rna$ct1
-  rna2@active.ident=as.factor(rna2$ct1)
-  rna = rna2
-}
-
+rna[['ct']] = ct
+rna@active.ident=as.factor(rna$ct)
 
 atac = dir(atac_path)
 atac_ct = unlist(strsplit(atac,'.bed.gz'))
 ct_use = intersect(rna@active.ident,atac_ct)
-rna[['ct']] = as.character(rna@active.ident)
+
+
 names(atac) = atac_ct
 atac = atac[names(atac) %in% ct_use]
 atac_list = list()
@@ -142,9 +164,6 @@ for (i in 1:length(sig_ct_list)) {
     ### disease related ccc
     ccc_plot_list[[i]] = p1
     ccc_list[[i]] = ccc
-  }else{
-    ccc_plot_list[[i]] = NA
-    ccc_list[[i]] = NA
   }
 }
 
@@ -196,8 +215,9 @@ for (i in 1:length(snp_list)) {
               quote = F,sep = '\t',row.names = F)
 }
 ### visualize
-
-
+source('E:\\DRCTdb\\5.Downstream_analysis\\plot.R')
+plot_main(sample_use = 'sample10')
+plot_heatmap_all()
 ########################
 ### infer grn from scRNA
 ########################
