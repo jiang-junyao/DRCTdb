@@ -143,6 +143,21 @@ sceasy::convertFormat(sample14_ATAC, from="seurat", to="anndata",assay = 'peaks'
 
 #sample16----
 sample16_ATAC <- readRDS('../../data/scATAC-seq/sample16/sample16_Bone_marrow_ATAC_Healthy_35k_processed.Rds')
+sparse_mtx <- sample16_ATAC@assays$peaks@counts
+sparse_mtx <- sparse_mtx[which(map_vec(rownames(sparse_mtx),subset_peaks)),]
+chrom_assay <- CreateChromatinAssay(
+  counts = sparse_mtx,
+  sep = c("-", "-"),
+  genome = 'hg38',
+  min.cells = 10,
+  min.features = 200
+)
+sample16_ATAC <- CreateSeuratObject(
+  counts = chrom_assay,
+  assay = "peaks",
+  meta.data = as.data.frame(sample16_ATAC@meta.data)
+)
+
 sceasy::convertFormat(sample16_ATAC, from="seurat", to="anndata",assay = 'peaks',
                       outFile='../../data/scATAC-seq/sample16/sample16_scATAC-seq_35k_processed.h5ad')
 #sample23----
