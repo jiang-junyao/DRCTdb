@@ -169,7 +169,7 @@ for (i in 1:length(snp_list)) {
               quote = F,sep = '\t',row.names = F)
 }
 ### visualize
-
+plot_main(sample_use = c('sample23','sample26'))
 
 ########################
 ### infer grn from scRNA
