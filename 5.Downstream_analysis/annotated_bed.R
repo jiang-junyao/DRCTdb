@@ -64,6 +64,7 @@ map(all_DERs,function(file){
     cat(file,'Finished\n')
 },.progress = T)
 
+
 snp_file <- list.files('../../data/downstream_result/',pattern = '.txt',full.names = T,recursive = T) %>% str_subset('snp')
 
 map(snp_file,function(file){
