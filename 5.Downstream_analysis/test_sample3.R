@@ -75,7 +75,7 @@ for (i in 1:nrow(ct_use)) {
       grn02 = ct_grn_atac(list1[[2]][,1:3],
                         unique(list1[[1]]$symbol),
                         rna_use,cor_thr=0.2,conver_gene = T)
-      grn_name = paste0(ct_use[i],'_',j)
+      grn_name = paste0(ct_use[i,1],'_',j)
       grn_list04[[grn_name]] = grn04
       grn_list02[[grn_name]] = grn02
       snp_list[[grn_name]] = list1
@@ -101,14 +101,24 @@ colnames(sig_ct_df) = c('disease','related_cell_type')
 write.table(sig_ct_df,paste0(output_path,'disease_related_celltypes.txt'),
             quote = F,sep = '\t',row.names = F)
 ### disease related ccc
+mt1 = rna@assays$RNA@counts
+gene1 = Converse_GeneIDSymbol(rownames(mt1),Spec1 = 'Hs')
+mt1 = mt1[gene1[,1],]
+rownames(mt1) = gene1[,2]
+rna2 = CreateSeuratObject(mt1,meta.data = rna@meta.data)
+rna2 = NormalizeData(rna2)
+rna2@active.ident =as.factor(rna2$cell_type)
+rna2[['ct']] = rna$cell_type
 source('F:\\general_code\\run_cellchat.R')
 ccc_plot_list = list()
 ccc_list = list()
 for (i in 1:length(sig_ct_list)) {
   disease_name_use = names(sig_ct_list)[i]
   related_ct = sig_ct_list[[i]]
+  related_ct = ct_use[related_ct,2]
+  related_ct = related_ct[!is.na(related_ct)]
   if (length(related_ct)>1) {
-    rna_use = subset(rna,ct %in% related_ct)
+    rna_use = subset(rna2,cell_type %in% related_ct)
     ccc = run_cellchat(rna_use,rna_use@meta.data,group = 'ct',species = 'hs')
     groupSize <- as.numeric(table(ccc@idents))
     par(mfrow=c(1,1))
@@ -122,7 +132,7 @@ for (i in 1:length(sig_ct_list)) {
   }
 }
 
-### output ccc
+ ### output ccc
 names(ccc_plot_list) = names(sig_ct_list)
 names(ccc_list) = names(sig_ct_list)
 for (i in 1:length(ccc_plot_list)) {
