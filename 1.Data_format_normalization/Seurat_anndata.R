@@ -145,7 +145,6 @@ sparse_mtx <- sample11_mtx@assays@data$PeakMatrix
 rownames(sparse_mtx) <- paste(as.data.frame(sample11_mtx@rowRanges)[[1]],as.data.frame(sample11_mtx@rowRanges)[[2]],as.data.frame(sample11_mtx@rowRanges)[[3]],sep = '-')
 sparse_mtx <- sparse_mtx[which(map_vec(rownames(sparse_mtx),subset_peaks)),]
 
-
 chrom_assay <- CreateChromatinAssay(
   counts = sparse_mtx,
   sep = c("-", "-"),
@@ -158,7 +157,7 @@ sample11_ATAC <- CreateSeuratObject(
   assay = "peaks",
   meta.data = as.data.frame(sample11_mtx@colData)
 )
-sample11_ATAC <- sample11_ATAC[,which(!is.na(sample11_ATAC$cell_type))]
+sample11_ATAC <- subset(sample11_ATAC,cells = names(which(!is.na(sample11_ATAC$cell_type))))
 
 saveRDS(sample11_ATAC,file = '../../data/scATAC-seq/Sample11/sample11_scATAC-seq_17k_processed.Rds')
 sceasy::convertFormat(sample11_ATAC, from="seurat", to="anndata",assay = 'peaks',
