@@ -112,12 +112,13 @@ rna2[['ct']] = rna$cell_type
 source('F:\\general_code\\run_cellchat.R')
 ccc_plot_list = list()
 ccc_list = list()
-for (i in 1:length(sig_ct_list)) {
+rna2$ct = as.character(rna2$ct)
+for (i in 20:length(sig_ct_list)) {
   disease_name_use = names(sig_ct_list)[i]
   related_ct = sig_ct_list[[i]]
   related_ct = ct_use[related_ct,2]
   related_ct = related_ct[!is.na(related_ct)]
-  if (length(related_ct)>1) {
+  if (length(unique(related_ct))>1) {
     rna_use = subset(rna2,cell_type %in% related_ct)
     ccc = run_cellchat(rna_use,rna_use@meta.data,group = 'ct',species = 'hs')
     groupSize <- as.numeric(table(ccc@idents))
@@ -132,7 +133,7 @@ for (i in 1:length(sig_ct_list)) {
   }
 }
 
- ### output ccc
+ `### output ccc
 names(ccc_plot_list) = names(sig_ct_list)
 names(ccc_list) = names(sig_ct_list)
 for (i in 1:length(ccc_plot_list)) {
@@ -181,7 +182,7 @@ for (i in 1:length(snp_list)) {
 }
 ### visualize
 source('E:\\DRCTdb\\5.Downstream_analysis\\plot.R')
-plot_main(sample_use = 'sample10')
+plot_main(sample_use = 'sample3')
 plot_heatmap_all()
 ########################
 ### infer grn from scRNA
