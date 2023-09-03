@@ -54,9 +54,15 @@ extract_expressed_features <- function(obj,cells_quantile = 0.05){
   return(TfExp)
 }
 
-peak_anno <- function(reference_GRange, tssRegion = c(-3000, 3000)) {
-  library(TxDb.Hsapiens.UCSC.hg38.knownGene)
-  txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene
+peak_anno <- function(reference_GRange, tssRegion = c(-3000, 3000),version='hg19') {
+  if (version=='hg38') {
+      library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+      txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene
+  }else if(version=='hg19'){
+    library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+    txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
+  }
+
   library(org.Hs.eg.db)
   annodb <- 'org.Hs.eg.db'
 
