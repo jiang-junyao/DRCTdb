@@ -225,7 +225,7 @@ sceasy::convertFormat(sample23_ATAC, from="seurat", to="anndata",assay = Default
 sample24_ATAC <- readRDS('../../data/scATAC-seq/Sample24/sample24_scATAC-seq_100k_healthy_processed.Rds')
 sceasy::convertFormat(sample24_ATAC, from="seurat", to="anndata",assay = 'peaks',
                       outFile='../../data/scATAC-seq/sample24/sample24_scATAC-seq_52k_processed.h5ad')
-#sample24----
+#sample26----
 sample26_mtx <- readRDS('../../data/scATAC-seq/Sample26/Sample26_peak_matrix.Rds')
 sparse_mtx <- sample26_mtx@assays@data$PeakMatrix
 rownames(sparse_mtx) <- paste(as.data.frame(sample26_mtx@rowRanges)[[1]],as.data.frame(sample26_mtx@rowRanges)[[2]],as.data.frame(sample26_mtx@rowRanges)[[3]],sep = '-')
@@ -242,9 +242,28 @@ sample26_ATAC <- CreateSeuratObject(
     assay = "peaks",
     meta.data = as.data.frame(sample26_mtx@colData)
 )
-saveRDS(sample26_ATAC,file = '../../data/scATAC-seq/Sample26')
+saveRDS(sample26_ATAC,file = '../../data/scATAC-seq/Sample26/Sample26_scATAC-seq_229k_processed.Rds')
 sceasy::convertFormat(sample26_ATAC, from="seurat", to="anndata",assay = 'peaks',
                       outFile='../../data/scATAC-seq/Sample26/Sample26_scATAC-seq_229k_processed.h5ad')
 
-sceasy::convertFormat(sample26_ATAC, from="seurat", to="anndata",assay = 'peaks',
-                      outFile='../../data/scATAC-seq/sample26/Sample26_scATAC-seq_229k_processed.h5ad')
+#sample27-----
+sample27_mtx <- readRDS('../../data/scATAC-seq/sample27/Sample27_peak_matrix.Rds')
+sparse_mtx <- sample27_mtx@assays@data$PeakMatrix
+rownames(sparse_mtx) <- paste(as.data.frame(sample27_mtx@rowRanges)[[1]],as.data.frame(sample27_mtx@rowRanges)[[2]],as.data.frame(sample27_mtx@rowRanges)[[3]],sep = '-')
+sparse_mtx <- sparse_mtx[which(map_vec(rownames(sparse_mtx),subset_peaks)),]
+chrom_assay <- CreateChromatinAssay(
+    counts = sparse_mtx,
+    sep = c("-", "-"),
+    genome = 'hg19',
+    min.cells = 10,
+    min.features = 200
+)
+sample27_ATAC <- CreateSeuratObject(
+    counts = chrom_assay,
+    assay = "peaks",
+    meta.data = as.data.frame(sample27_mtx@colData)
+)
+saveRDS(sample27_ATAC,file = '../../data/scATAC-seq/Sample27/Sample27_scATAC-seq_133k_processed.Rds')
+sceasy::convertFormat(sample27_ATAC, from="seurat", to="anndata",assay = 'peaks',
+                      outFile='../../data/scATAC-seq/Sample27/Sample27_scATAC-seq_133k_processed.h5ad')
+
