@@ -46,7 +46,7 @@ def run_scbasset(h5ad,outname,genome = 'hg38'):
             chr_var_key="chr",
             start_var_key="start",
             end_var_key="end",
-            install_genome = True
+            install_genome = False
         )
         print('Adding GRCh38 Genome')
         adata.varm["dna_sequence"]
@@ -58,7 +58,7 @@ def run_scbasset(h5ad,outname,genome = 'hg38'):
             chr_var_key="chr",
             start_var_key="start",
             end_var_key="end",
-            install_genome = True
+            install_genome = False
         )
         print('Adding GRCh37 Genome')
         adata.varm["dna_sequence"]
@@ -93,7 +93,7 @@ def run_scbasset(h5ad,outname,genome = 'hg38'):
     #     plt.savefig(f"{outname}_umap_plot.svg", dpi = 300,bbox_inches="tight")
 
 
-    motif_file = glob.glob("./data/*.fasta")
+    motif_file = glob.glob("./data/motifs/shuffled_peaks_motifs/*.fasta")
     tf_name = [os.path.splitext(os.path.basename(i))[0] for i in motif_file]
     ##Calculate tf_activity
     def get_tf_activity(tf):
