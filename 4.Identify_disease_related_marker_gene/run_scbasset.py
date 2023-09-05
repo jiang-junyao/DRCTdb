@@ -93,7 +93,7 @@ def run_scbasset(h5ad,outname,genome = 'hg38'):
     #     plt.savefig(f"{outname}_umap_plot.svg", dpi = 300,bbox_inches="tight")
 
 
-    motif_file = glob.glob("/home/kyh/Desktop/ScBasset/data/motifs/shuffled_peaks_motifs/*.fasta")
+    motif_file = glob.glob("./data/motifs/shuffled_peaks_motifs/*.fasta")
     tf_name = [os.path.splitext(os.path.basename(i))[0] for i in motif_file]
     ##Calculate tf_activity
     def get_tf_activity(tf):
