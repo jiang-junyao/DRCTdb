@@ -74,7 +74,8 @@ ct = gsub('Vascular_SMC_2','Vascular_SMC',ct)
 
 rna[['ct']] = ct
 rna@active.ident=as.factor(rna$ct)
-
+sceasy::convertFormat(rna, from="seurat", to="anndata",
+                      outFile='F:\\DRCTdb\\sc_rna_h5/sample10_lung_scRNA_71k_processed.h5')
 atac = dir(atac_path)
 atac_ct = unlist(strsplit(atac,'.bed.gz'))
 ct_use = intersect(rna@active.ident,atac_ct)

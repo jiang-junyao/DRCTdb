@@ -26,6 +26,8 @@ dir.create(paste0(output_path,'ccc'))
 rna = readRDS(rna_path)
 
 rna@active.ident=as.factor(rna$cell_type)
+sceasy::convertFormat(rna, from="seurat", to="anndata",
+                      outFile='F:\\DRCTdb\\sc_rna_h5/sample14_embroy_scRNA_300k_processed.h5')
 cell_use = c()
 for (i in levels(as.factor(rna$cell_type))) {
   rna_use = subset(rna,cell_type == i)

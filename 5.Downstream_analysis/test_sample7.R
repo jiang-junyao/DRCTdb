@@ -39,6 +39,8 @@ ct_m = gsub('Retinal ganglion cell','Retinalganglioncell',ct_m)
 ct_m = gsub('Rod bipolar','Rodbipolar',ct_m)
 
 rna@active.ident=as.factor(ct_m)
+sceasy::convertFormat(rna, from="seurat", to="anndata",
+                      outFile='F:\\DRCTdb\\sc_rna_h5/sample7_retina_scRNA_51k_processed.h5')
 atac = dir(atac_path)
 atac_ct = unlist(strsplit(atac,'.bed.gz'))
 ct_use = intersect(rna@active.ident,atac_ct)

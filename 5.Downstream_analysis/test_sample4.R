@@ -7,7 +7,7 @@ source('overlap_gwas.R')
 source('plot.R')
 ### path need to define
 output_path = 'E:\\DRCTdb\\ignore\\downstream_result\\sample4\\'
-rna_path = 'E:\\DRCTdb\\ignore\\scRNA-seq\\sample4\\sample4_scRNA-seq.Rds'
+rna_path = 'F:\\DRCTdb\\ignore\\scRNA-seq\\sample4\\sample4_scRNA-seq.Rds'
 atac_path = 'E:\\DRCTdb\\ignore\\bed\\sample4/'
 ldsc_path = "E:/DRCTdb/ignore/LDSC_results/sample4/pvalues.tsv"
 #### db path
@@ -40,6 +40,8 @@ ct_m = gsub('Pericytes','PC',ct_m)
 ct_m = gsub('Endocardium','Endo1',ct_m)
 rna[['ct']] = ct_m
 rna@active.ident=as.factor(ct_m)
+sceasy::convertFormat(rna, from="seurat", to="anndata",
+                      outFile='F:\\DRCTdb\\sc_rna_h5/sample4_heart_scRNA_18k_processed.h5')
 atac = dir(atac_path)
 atac_ct = unlist(strsplit(atac,'.bed.gz'))
 ct_use = intersect(rna@active.ident,atac_ct)
@@ -81,7 +83,7 @@ for (i in 1:length(ct_use)) {
       list1 = gwas_related_features(rna_use,atac_list[[i]],
                             disease_name=j,
                             snp_all = snp_all,zscore_thr = 1)
-      
+
       grn04 = ct_grn_atac(list1[[2]][,1:3],
                         unique(list1[[1]]$symbol),
                         rna_use,cor_thr=0.4)
@@ -126,7 +128,7 @@ for (i in 1:length(sig_ct_list)) {
     groupSize <- as.numeric(table(ccc@idents))
     par(mfrow=c(1,1))
     p1 = netVisual_circle(ccc@net$weight, vertex.weight = groupSize,
-                     weight.scale = T, label.edge= F, 
+                     weight.scale = T, label.edge= F,
                      title.name = "",vertex.label.cex = 1)
     print(disease_name_use)
     ### disease related ccc

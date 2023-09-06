@@ -32,7 +32,8 @@ atac_ct = unlist(strsplit(atac,'.bed.gz'))
 ct_use = read.delim('E:\\DRCTdb\\ignore\\downstream_result\\sample3\\ct_corr.txt',
                     header = F)
 rownames(ct_use)=ct_use[,1]
-
+sceasy::convertFormat(rna, from="seurat", to="anndata",
+                      outFile='F:\\DRCTdb\\sc_rna_h5/sample3_atlas_scRNA_600k_processed.h5')
 names(atac) = atac_ct
 atac = atac[names(atac) %in% ct_use$V1]
 atac_list = list()
