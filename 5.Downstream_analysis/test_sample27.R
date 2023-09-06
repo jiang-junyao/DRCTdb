@@ -30,6 +30,8 @@ ct = gsub(' ','_',ct)
 ct = gsub('/','_',ct)
 rna[['ct']] = ct
 rna@active.ident = as.factor(rna$ct)
+sceasy::convertFormat(rna, from="seurat", to="anndata",
+                      outFile='F:\\DRCTdb\\sc_rna_h5/sample27_intestine_scRNA_280k_processed.h5')
 rna = seurat_sample_ct(rna,2000)
 atac = dir(atac_path)
 atac_ct = unlist(strsplit(atac,'.bed.gz'))
