@@ -27,7 +27,8 @@ rna = readRDS(rna_path)
 rna@active.ident = as.factor(rna$cell_type)
 rna[['ct']] = as.character(rna@active.ident)
 rna = seurat_sample_ct(rna)
-
+sceasy::convertFormat(rna, from="seurat", to="anndata",
+                      outFile='F:\\DRCTdb\\sc_rna_h5/sample23_islet_scRNA_95k_processed.h5')
 atac = dir(atac_path)
 atac_ct = unlist(strsplit(atac,'.bed.gz'))
 ct_use = intersect(rna@active.ident,atac_ct)

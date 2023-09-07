@@ -31,6 +31,8 @@ ct_table = read.delim('F:\\DRCTdb\\ignore\\scRNA-seq\\Sample6\\ct.txt',header = 
 rna[['ct']] = as.character(rna$annotation)
 rna@active.ident = as.factor(rna$ct)
 rna = subset(rna,annotation %in% ct_table$V2)
+sceasy::convertFormat(rna, from="seurat", to="anndata",
+                      outFile='F:\\DRCTdb\\sc_rna_h5/sample5_heart_scRNA_180k_processed.h5')
 atac = dir(atac_path)
 atac_ct = unlist(strsplit(atac,'.bed.gz'))
 ct_use = atac_ct[atac_ct %in% ct_table$V1]

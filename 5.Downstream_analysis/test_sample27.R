@@ -6,15 +6,16 @@ source('identify_region_motif.R')
 source('overlap_gwas.R')
 source('plot.R')
 ### path need to define
-output_path = 'E:\\DRCTdb\\ignore\\downstream_result\\sample10\\'
-rna_path = 'F:\\DRCTdb\\ignore\\scRNA-seq\\Sample10\\seurat.rds'
-atac_path = 'E:\\DRCTdb\\ignore\\bed\\sample10/'
-ldsc_path = "E:/DRCTdb/ignore/LDSC_results/sample10/pvalues.tsv"
+output_path = 'E:\\DRCTdb\\ignore\\downstream_result\\sample27\\'
+rna_path = 'F:\\DRCTdb\\ignore\\scRNA-seq\\Sample27\\sample27_processed_280kRNA.Rds'
+atac_path = 'E:\\DRCTdb\\ignore\\bed\\sample27/'
+ldsc_path = "E:/DRCTdb/ignore/LDSC_results/sample27/pvalues.tsv"
 #### db path
 
 snp_path = 'E:\\public\\all_snp_info_gr.Rds'
 disease_path = 'E:\\DRCTdb\\ignore\\LDSC_hg38\\summary_statistics\\Josh'
 source('F:\\general_code\\run_cellchat.R')
+source('F:\\general_code\\seurat_sample_ct.R')
 ### create output folder
 dir.create(paste0(output_path))
 dir.create(paste0(output_path,'grn_cor04'))
@@ -24,62 +25,17 @@ dir.create(paste0(output_path,'atac_snp'))
 dir.create(paste0(output_path,'ccc'))
 ###load data & define cell type use
 rna = readRDS(rna_path)
-ct = as.character(rna$new_celltype)
+ct = as.character(rna$cell_type)
 ct = gsub(' ','_',ct)
-ct = gsub('aDC_1','aDC',ct)
-ct = gsub('aDC_2','aDC',ct)
-ct = gsub('AT1','AT1_AT2',ct)
-ct = gsub('AT2','AT1_AT2',ct)
-ct = gsub('Late_airway_SMC','Airway_SMC',ct)
-ct = gsub('Mid_airway_SMC_1','Airway_SMC',ct)
-ct = gsub('Mid_airway_SMC_2','Airway_SMC',ct)
-ct = gsub('Proximal_basal','Basal',ct)
-ct = gsub('Late_basal','Basal',ct)
-ct = gsub('Mid_basal','Basal',ct)
-ct = gsub('CD16+_NK','CD16_high_NK',ct)
-ct = gsub('CD5-_Mature_B','CD5-_mature_B',ct)
-ct = gsub('CD5+_CCL22-_mature_B','CD5_high_mature_B',ct)
-ct = gsub('CD5+_CCL22+_mature_B','CD5_high_mature_B',ct)
-ct = gsub('CX3CR1+_M桅','CX3CR1_high_Mac',ct)
-ct = gsub('CDefinitive_erythrocyte','Def_ery"',ct)
-ct = gsub('Early_mesothelial','Early_meso"',ct)
-ct = gsub('GHRL+_neuroendocrine','GHRL_high_NE',ct)
-ct = gsub('Th17','ILC3_Th17',ct)
-ct = gsub('ILC3','ILC3_Th17',ct)
-ct = gsub('Intermediate_lymphatic_endo','Interm_lymphatic_endo',ct)
-ct = gsub('Megakaryocyte','Megk',ct)
-ct = gsub('Mid_mesothelial','Mid_late_meso',ct)
-ct = gsub('Late_mesothelial','Mid_late_meso',ct)
-ct = gsub('Promonocyte-like','Monocyte',ct)
-ct = gsub('Myofibro_3','Myofibro',ct)
-ct = gsub('Myofibro_2','Myofibro',ct)
-ct = gsub('Myofibro_1','Myofibro',ct)
-ct = gsub('PCP4+_neuron','Neuron',ct)
-ct = gsub('MFNG+_DBH+_neuron','Neuron',ct)
-ct = gsub('TM4SF4+_CHODL+_neuron','Neuron',ct)
-ct = gsub('KCNIP4+_neuron','Neuron',ct)
-ct = gsub('TM4SF4+_PENK+_neuron','Neuron',ct)
-ct = gsub('NKT1','NKT',ct)
-ct = gsub('NKT2','NKT',ct)
-ct = gsub('Primitive_erythrocyte','Pri_ery',ct)
-ct = gsub('Pulmonary_neuroendocrine','Pulmonary_NE',ct)
-ct = gsub('Early_Schwann','Schwann',ct)
-ct = gsub('Late_Schwann','Schwann',ct)
-ct = gsub('Proximal_secretory_2','Secretory_1_2',ct)
-ct = gsub('Proximal_secretory_3','Secretory_1_2',ct)
-ct = gsub('Proximal_secretory_1','Secretory_1_2',ct)
-ct = gsub('魏_small_pre-B','Small_pre-B',ct)
-ct = gsub('Vascular_SMC_1','Vascular_SMC',ct)
-ct = gsub('Vascular_SMC_2','Vascular_SMC',ct)
-
+ct = gsub('/','_',ct)
 rna[['ct']] = ct
-rna@active.ident=as.factor(rna$ct)
+rna@active.ident = as.factor(rna$ct)
 sceasy::convertFormat(rna, from="seurat", to="anndata",
-                      outFile='F:\\DRCTdb\\sc_rna_h5/sample10_lung_scRNA_71k_processed.h5')
+                      outFile='F:\\DRCTdb\\sc_rna_h5/sample27_intestine_scRNA_280k_processed.h5')
+rna = seurat_sample_ct(rna,2000)
 atac = dir(atac_path)
 atac_ct = unlist(strsplit(atac,'.bed.gz'))
 ct_use = intersect(rna@active.ident,atac_ct)
-
 
 names(atac) = atac_ct
 atac = atac[names(atac) %in% ct_use]
@@ -216,16 +172,6 @@ for (i in 1:length(snp_list)) {
               quote = F,sep = '\t',row.names = F)
 }
 ### visualize
-source('E:\\DRCTdb\\5.Downstream_analysis\\plot.R')
-plot_main(sample_use = 'sample10')
 plot_heatmap_all()
-########################
-### infer grn from scRNA
-########################
-source('run_scenic.R')
-run_scenic_main(rna_test)
-rcistarget_out = readRDS('./int/2.1_tfModules_forMotifEnrichmet.Rds')
-geneie3_out = readRDS('./int/1.4_GENIE3_linkList.Rds')
-tf = t(as.data.frame(strsplit(names(rcistarget_out),'_')))[,1]
-geneie3_out = geneie3_out[geneie3_out$TF %in% tf,]
-geneie3_out = geneie3_out[geneie3_out$Target %in% unlist(rcistarget_out),]
+plot_main(sample_use = 'sample27')
+

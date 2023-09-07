@@ -39,7 +39,8 @@ ct1 = gsub('renal principal cell','PC',ct1)
 rna[['ct1']] = ct1
 
 rna@active.ident=as.factor(rna$ct1)
-
+sceasy::convertFormat(rna, from="seurat", to="anndata",
+                      outFile='F:\\DRCTdb\\sc_rna_h5/sample8_kidney_scRNA_68k_processed.h5')
 
 if (str_sub(rownames(rna)[1],1,3)=='ENS') {
   gene1 = Converse_GeneIDSymbol(rownames(rna),Spec1 = 'Hs')
