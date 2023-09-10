@@ -48,7 +48,7 @@ peak_anno <- function(reference_GRange, tssRegion = c(-2000, 500),filter = FALSE
     return(peak_gr)
 }
 
-all_DERs <- list.files('../../data/DERs/',full.names = T)
+all_DERs <- list.files('../../data/DERs/',pattern = 'txt$',full.names = T)
 map(all_DERs,function(file){
     df <-
         data.table::fread(file) %>% separate(
