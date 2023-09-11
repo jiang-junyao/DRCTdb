@@ -3,7 +3,7 @@ library(Seurat)
 library(tidyverse)
 library(Matrix)
 library(glue)
-source('preprocess_functions.R')
+source('../2.Data preprocessing//preprocess_functions.R')
 
 
 get_celltype_TF_act <- function(df){
@@ -20,10 +20,10 @@ get_celltype_TF_act <- function(df){
 
 
 ##
-sample_rds <- list.files('../../data/Rds/',full.names = T)[-3]
+sample_rds <- list.files('../../data/Rds/',full.names = T)
 names(sample_rds) <- str_extract(sample_rds,'sample\\d+|Sample\\d+')
 
-tf_activity <- list.files('../../data/TF_activity/',full.names = T)[-12]
+tf_activity <- list.files('../../data/TF_activity/rawdata/',full.names = T)
 names(tf_activity) <- str_extract(tf_activity,'sample\\d+|Sample\\d+')
 
 
@@ -45,7 +45,7 @@ for (i in 1:length(sample_rds)) {
         summarise(across(where(is.numeric), sum)) %>%
         dplyr::select(c('cell_type', colnames(TF_act)[-1]))
     
-    out_file <- paste0('../../data/TF_activity/',names(sample_rds)[i],'cell_type_activity.Rds')
+    out_file <- paste0('../../data/TF_activity/Temp/',names(sample_rds)[i],'cell_type_activity.Rds')
     saveRDS(TF_act_metadata,out_file)
     cat(names(sample_rds)[i],'is',class(rds),'Object finished\n')
 }
@@ -78,6 +78,30 @@ sample5_TF_act_metadata <- left_join(sample5_metadata_df,sample5_TF_act,by = c('
     summarise(across(where(is.numeric),sum)) %>% 
     dplyr::select(c('cell_type',colnames(sample5_TF_act)[-1]))
 saveRDS(sample5_TF_act_metadata,'../../data/TF_activity/Temp/sample5cell_type_activity.Rds')
+
+###
+
+sample11_rds <- readRDS(sample_rds[3])
+sample11_TF_act_metadata <- sample11_rds@meta.data %>% rownames_to_column('cell_barcode')
+sample11_TF_act <- data.table::fread('../../data/TF_activity/rawdata/sample11_scATAC-seq_17k_processed_tf_activity.txt',sep = '\t')
+
+
+sample11_TF_act_metadata <-
+    left_join(sample11_TF_act_metadata,
+              sample11_TF_act,
+              by = c('cell_barcode' = 'V1')) %>%
+    filter(!is.na(cell_type))  %>%
+    group_by(cell_type) %>%
+    summarise(across(where(is.numeric), sum)) %>%
+    dplyr::select(c('cell_type', colnames(sample11_TF_act)[-1]))
+
+
+saveRDS(sample11_TF_act_metadata,'../../data/TF_activity/Temp/sample11cell_type_activity.Rds')
+
+Sample11_tf_activity <- get_celltype_TF_act(sample11_TF_act_metadata)
+data.table::fwrite(Sample11_tf_activity,
+                   file =  '../../data/TF_activity/sample11_tf_activity_top10.txt',
+                   sep = '\t')
 
 
 
@@ -119,3 +143,5 @@ Sample5_tf_activity <- get_celltype_TF_act(sample5_TF_act_metadata)
 data.table::fwrite(Sample12_tf_activity2,
                    file =  '../../data/TF_activity/sample5_tf_activity_top10.txt',
                    sep = '\t')
+
+
