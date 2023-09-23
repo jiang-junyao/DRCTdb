@@ -176,7 +176,8 @@ sample13_ATAC$cell_type <- sample13_ATAC$predicted.id
 saveRDS(sample13_ATAC,'../../data/scATAC-seq/Sample13/sample13_Bone_marrow_ATAC_4k_processed.Rds')
 sceasy::convertFormat(sample13_ATAC, from="seurat", to="anndata",assay = 'peaks',
                       outFile='../../data/scATAC-seq/sample13/sample13_scATAC-seq_4k_processed.h5ad')
-
+sceasy::convertFormat(sample13_ATAC, from="seurat", to="anndata",assay = 'peaks',
+                      outFile='../../data/scATAC-seq/sample13/sample13_scATAC-seq_4k_processed.h5ad')
 
 #sample14----
 sample14_ATAC <- readRDS('../../data/scATAC-seq/sample14/sample14_processed_95k_scATAC.Rds')
