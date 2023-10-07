@@ -1,3 +1,5 @@
+library(tidyverse)
+
 cal_ct_score <- function(overlap_DBRs,DBRs_gr){
   
   ### process
@@ -34,3 +36,37 @@ cal_ct_score <- function(overlap_DBRs,DBRs_gr){
   
   return(ct_score)
 }
+
+
+ldsc_res <- list.files('../../data/LDSC_results/',pattern = 'pvalues.tsv',recursive = T)
+    
+ldsc_res_list <- map(paste0('../../data/LDSC_results/',ldsc_res),function(x){
+    data.table::fread(x) %>% as_tibble() %>% 
+        pivot_longer(cols = -V1,names_to = 'cell_type',values_to = 'pvalue') %>% 
+        mutate(neglog10p = -log10(pvalue)) %>% 
+        arrange(desc(neglog10p)) %>%
+        filter(abs(neglog10p) >= 3) 
+}) %>% setNames(str_extract(ldsc_res,'\\w+'))
+
+
+DRCTS <- map(ldsc_res_list,function(x){
+    unique(x[['V1']])
+})
+
+DRCTS_res <- tibble(
+    dataset = names(DRCTS),
+    disease = map_chr(DRCTS,function(x){
+        if(length(x) > 3){
+            x <- x[1:3]
+            x <- paste0(x,collapse = ';') %>% paste0('...')
+        }else{
+            x <- paste0(x,collapse = ';')
+        }
+        
+        return(x)
+    })
+) %>% arrange(as.numeric(str_extract(dataset,'\\d+')))
+
+data.table::fwrite(DRCTS_res,file = '../../data/LDSC_results/DRCTS_res.xls',sep = '\t')
+
+
