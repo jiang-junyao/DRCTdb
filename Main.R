@@ -26,3 +26,44 @@ eqtl_gr <- GRanges(paste0(eqtl$CHROM,':',eqtl$POS,'-',eqtl$POS))
 overlapregion <- findOverlaps(DBRs_gr,eqtl_gr)
 overlap_DBRs <- DBRs_gr[overlapregion@from]
 ct_score <- cal_ct_score(overlap_DBRs,DBRs_gr)
+
+
+
+##Basic statistics
+library(tidyverse)
+sample_tissue <- readxl::read_excel('../data/sample_tissue.xlsx',col_names = F)
+colnames(sample_tissue) <- c('dataset','tissue')
+sample_tissue <- separate_rows(sample_tissue,tissue,sep = ',')
+writexl::write_xlsx(sample_tissue,'../data/sample_tissue2.xlsx')
+
+sample1 <- readRDS('../data/Rds/sample1_scATAC-seq_80k_processed.Rds')
+sample3 <- readRDS('../data/Rds/sample3_scATAC-seq_756k_processed.Rds')
+
+sample3_df <- sample3$cell_type |> table()  |> as.data.frame()
+sample3_meta <- data.table::fread('../data/scATAC-seq/Sample3/Cell_metadata.tsv.gz')
+
+sample3_tissue <- sample_tissue %>% filter(dataset == 'Sample3') %>% pull(tissue)
+map_int(sample3_tissue,function(x){
+    sample3_df %>% filter(str_detect(sample3_df$Var1,tolower(x))) %>% pull(Freq) %>% sum()
+}) %>% setNames(sample3_tissue)
+
+sample3_df2 <- sample3_meta$tissue |> table() |> as.data.frame()
+sample3_df2 %>% filter(str_detect(Var1,tolower('Breast'))) %>% pull(Freq) %>% sum()
+sample4 <- readRDS('../data/Rds/sample4_scATAC-seq_30k_processed.Rds')
+
+sample16 <- readRDS('../data/Rds/sample16_Bone_marrow_ATAC_Healthy_35k_processed.Rds')
+
+
+##
+sample5_meta <- data.table::fread('../data/scATAC-seq/Sample5/filtered.cell_metadata.for_website.txt.gz')
+sample26 <- readRDS('../data/Rds/Sample26_scATAC-seq_229k_processed.Rds')
+sample26_df <- sample26$Sample |> table()  |> as.data.frame()
+sample26_df %>% filter(str_detect(Var1,'BY')) %>% pull(Freq) %>% sum()
+
+
+
+sample_tissue <- readxl::read_excel('../data/scdb_core.xlsx',sheet = 'Sheet2')
+
+test <- sample_tissue %>% group_by(dataset) %>% summarise(tissue = paste0(tissue,collapse = ';')) %>% 
+    mutate(num = str_extract(dataset,'\\d+'))
+    arrange(dataset, .by_group = TRUE)
