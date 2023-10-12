@@ -45,25 +45,38 @@ ldsc_res_list <- map(paste0('../../data/LDSC_results/',ldsc_res),function(x){
         pivot_longer(cols = -V1,names_to = 'cell_type',values_to = 'pvalue') %>% 
         mutate(neglog10p = -log10(pvalue)) %>% 
         arrange(desc(neglog10p)) %>%
-        filter(abs(neglog10p) >= 3)  %>% 
+        filter(V1 != 'Atrial_fibrillation',abs(neglog10p) >= 3)  %>% 
         select(1:3) 
     colnames(df) <- c('Disease', 'Cell type','p value')
     return(df)
 }) %>% setNames(str_extract(ldsc_res,'\\w+'))
 
 
+for (i in 1:length(ldsc_res_list)) {
+    data.table::fwrite(ldsc_res_list[[i]],
+                       file = paste0('../../data/downstream_result/',names(ldsc_res_list)[i],'/',names(ldsc_res_list)[i],'_related_disease.xls'),
+                       sep = '\t')
+}
+
 writexl::write_xlsx(ldsc_res_list,'../../data/LDSC_results/DRCTS_res.xlsx') 
 
 DRCTS <- map(ldsc_res_list,function(x){
     unique(x[['Disease']])
 })
+core_table <- tibble(
+    sample = names(DRCTS),
+    total_disease = map_chr(DRCTS,function(x){paste0(unique(x),collapse = ';')}),
+    order = as.numeric(str_extract(sample,'\\d+'))
+)%>% arrange(order)
+data.table::fwrite(core_table,file = '../../data/LDSC_results/DRCTS_core_table.xls',sep = '\t')
+
 
 
 DRCT_stat <- tibble(
     dataset = names(DRCTS),
     num = map_int(DRCTS,length),
     order = as.numeric(str_extract(dataset,'\\d+'))
-) %>% filter(dataset != '') %>% arrange(order)
+) %>% filter(dataset != 'sample20') %>% arrange(order)
 clustcol<-c("OrangeRed","SlateBlue3","DarkOrange","GreenYellow","Purple","DarkSlateGray","Gold","DarkGreen","DeepPink2","Red4","#4682B4","#FFDAB9","#708090","#836FFF","#CDC673","#CD9B1D","#FF6EB4","#CDB5CD","#008B8B","#43CD80","#483D8B","#66CD00","#CDC673","#CDAD00","#CD9B9B","#FF8247","#8B7355","#8B3A62","#68228B","#CDB7B5","#CD853F","#6B8E23","#696969","#7B68EE","#9F79EE","#B0C4DE","#7A378B","#66CDAA","#EEE8AA","#00FF00","#EEA2AD","#A0522D","#000080","#E9967A","#00CDCD","#8B4500","#DDA0DD","#EE9572","#EEE9E9","#8B1A1A","#8B8378","#EE9A49","#EECFA1","#8B4726","#8B8878","#EEB4B4","#C1CDCD","#8B7500","#0000FF","#EEEED1","#4F94CD","#6E8B3D","#B0E2FF","#76EE00","#A2B5CD","#548B54","#BBFFFF","#B4EEB4","#00C5CD","#008B8B","#7FFFD4","#8EE5EE","#43CD80","#68838B","#00FF00","#B9D3EE","#9ACD32","#00688B","#FFEC8B","#1C86EE","#CDCD00","#473C8B","#FFB90F","#EED5D2","#CD5555","#CDC9A5","#FFE7BA","#FFDAB9","#CD661D","#CDC5BF","#FF8C69","#8A2BE2","#CD8500","#B03060","#FF6347","#FF7F50","#CD0000","#F4A460","#FFB5C5","#DAA520","#CD6889","#32CD32","#FF00FF","#2E8B57","#CD96CD","#48D1CC","#9B30FF","#1E90FF","#CDB5CD","#191970","#E8E8E8","#FFDAB9")
 
 
@@ -98,7 +111,6 @@ ggplot(test_res,aes(gene_name,Fold,fill= sample)) +
                         xmax = rep(1:length(get_ano(test_res))) + 0.2,
                         annotation = get_ano(test_res),
                         tip_length = 0)
-
 
 DRCTS_res <- tibble(
     dataset = names(DRCTS),
