@@ -29,6 +29,13 @@ ct_score <- cal_ct_score(overlap_DBRs,DBRs_gr)
 
 
 
+
+
+
+##------
+scdb_core <- readxl::read_xlsx('../../data/scdb_core.xlsx')
+scdb_core_total <- scdb_core %>% separate_rows(total_disease,sep = ';') %>% separate_rows(Tissue,sep = ';')
+writexl::write_xlsx(scdb_core_total,'../../data/scdb_core_total.xlsx')
 ##Basic statistics
 library(tidyverse)
 sample_tissue <- readxl::read_excel('../data/sample_tissue.xlsx',col_names = F)
@@ -143,3 +150,25 @@ names(cell_num) <- sample_tissue2$tissue
 pdf('../data/tissue_cell_num.pdf',width = 8,height = 8)
 doughnut(sample(cell_num),col = clustcol)
 dev.off()
+
+for (i in list.files('../../data/downstream_result/')) {
+    raw_path <- paste0('../../data/downstream_result/',i,'/cellchat_ccc.rds')
+    new_path <- paste0('../../data/CCC_obj/',i,'_ccc.rds')
+    file.copy(raw_path,new_path,overwrite = T)
+    file.remove(raw_path)
+    cat(i,'finished\n')
+}
+for (i in list.files('../../data/DERs/')){
+    raw_path <- paste0('../../data/DERs/',i)
+    new_path <- paste0('../../data/downstream_result/',str_extract(i,'sample\\d+'),'/',i)
+    file.copy(raw_path,new_path,overwrite = T)
+}
+
+for (i in list.files('../../data/LDSC_results/',pattern = 'zip')){
+    raw_path <- paste0('../../data/LDSC_results/',i)
+    new_path <- paste0('../../data/downstream_result/',str_extract(i,'sample\\d+'),'/',i)
+    file.copy(raw_path,new_path,overwrite = T)
+    file.remove(raw_path)
+    cat(i,'finished\n')
+}
+
