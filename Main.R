@@ -172,3 +172,29 @@ for (i in list.files('../../data/LDSC_results/',pattern = 'zip')){
     cat(i,'finished\n')
 }
 
+##text to json
+
+library(jsonlite)
+
+
+table2json <- function(x){
+    filename <- tools::file_path_sans_ext(basename(x))
+    output_name <- paste0(dirname(x),'/',filename,'.json')
+    if (str_detect(x,'xlsx')) {
+        df <- readxl::read_excel(x)
+    }else{
+        df <- data.table::fread(x)
+    }
+    json_data <- jsonlite::toJSON(df)
+    jsonlite::write_json(json_data,output_name)
+    return(json_data)
+}
+
+
+#test <-  table2json('../../data/scdb_core.xlsx')
+
+
+all_downstream_txt <- list.files('../data/downstream_result/',pattern = 'txt|xls',recursive = T,full.names = T)
+
+
+res <- map(all_downstream_txt,table2json,.progress = T)
