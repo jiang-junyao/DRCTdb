@@ -268,3 +268,7 @@ saveRDS(sample27_ATAC,file = '../../data/scATAC-seq/Sample27/Sample27_scATAC-seq
 sceasy::convertFormat(sample27_ATAC, from="seurat", to="anndata",assay = 'peaks',
                       outFile='../../data/scATAC-seq/Sample27/Sample27_scATAC-seq_133k_processed.h5ad')
 
+#sample28-----
+sample28_ATAC <- readRDS('../../data/scATAC-seq/Sample28/sample28_scATAC-seq_29k_processed.Rds')
+sceasy::convertFormat(sample28_ATAC, from="seurat", to="anndata",assay = 'peaks',
+                      outFile='../../data/h5ad/Sample28_scATAC-seq_29k_processed.h5ad')
