@@ -47,6 +47,7 @@ for (i in 1:length(sample_rds)) {
     
     out_file <- paste0('../../data/TF_activity/Temp/',names(sample_rds)[i],'cell_type_activity.Rds')
     saveRDS(TF_act_metadata,out_file)
+    gc()
     cat(names(sample_rds)[i],'is',class(rds),'Object finished\n')
 }
 
@@ -94,8 +95,6 @@ sample11_TF_act_metadata <-
     group_by(cell_type) %>%
     summarise(across(where(is.numeric), sum)) %>%
     dplyr::select(c('cell_type', colnames(sample11_TF_act)[-1]))
-
-
 saveRDS(sample11_TF_act_metadata,'../../data/TF_activity/Temp/sample11cell_type_activity.Rds')
 
 Sample11_tf_activity <- get_celltype_TF_act(sample11_TF_act_metadata)
