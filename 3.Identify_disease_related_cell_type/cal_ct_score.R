@@ -46,7 +46,7 @@ ldsc_res_list <- map(paste0('../../data/LDSC_results/',ldsc_res),function(x){
         mutate(neglog10p = -log10(pvalue)) %>% 
         arrange(desc(neglog10p)) %>%
         filter(V1 != 'Atrial_fibrillation',abs(neglog10p) >= 3)  %>% 
-        select(1:3) 
+        dplyr::select(1:3) 
     colnames(df) <- c('Disease', 'Cell type','p value')
     return(df)
 }) %>% setNames(str_extract(ldsc_res,'\\w+'))
@@ -85,7 +85,7 @@ p1 <- ggplot(DRCT_stat,aes(dataset,num,fill = dataset)) +
     labs(x = 'dataset', y = 'Enriched diease numbers') +
     geom_bar(stat = "identity",position = position_dodge(width = 1)) +
     scale_y_continuous(expand = c(0,0)) +
-    scale_x_discrete(labels = c(1:15)) +
+    scale_x_discrete(labels = c(1:nrow(DRCT_stat))) +
     scale_fill_manual(values = clustcol[1:nrow(DRCT_stat)]) +
     theme_bw() +
     guides(fill = F) 
@@ -94,23 +94,23 @@ cairo_pdf('../../data/enriched_disease2.pdf',width = 4,height = 2.5)
 p1
 dev.off()
 
-ggplot(test_res,aes(gene_name,Fold,fill= sample)) + 
-    geom_bar(stat = "identity",position = position_dodge(width = 1)) + theme_classic() +
-    geom_errorbar(aes(ymin = Fold - SD, ymax = Fold + SD),
-                  position=position_dodge(width=1), 
-                  width=0.3,size=0.3,colour="black") +
-    labs(x = '',y = 'Relative expression levels')+
-    guides()+
-    ggprism::theme_prism()+
-    scale_fill_manual(values = c("#69b3a2","#836FFF"))+
-    theme(axis.title.x = element_blank(),
-          aspect.ratio = 1.3,
-          axis.text.x = element_text(angle = 45))+
-    ggpubr::geom_signif(y_position = get_maxfold(test_res), 
-                        xmin = rep(1:length(get_ano(test_res))) -0.2, 
-                        xmax = rep(1:length(get_ano(test_res))) + 0.2,
-                        annotation = get_ano(test_res),
-                        tip_length = 0)
+# ggplot(test_res,aes(gene_name,Fold,fill= sample)) + 
+#     geom_bar(stat = "identity",position = position_dodge(width = 1)) + theme_classic() +
+#     geom_errorbar(aes(ymin = Fold - SD, ymax = Fold + SD),
+#                   position=position_dodge(width=1), 
+#                   width=0.3,size=0.3,colour="black") +
+#     labs(x = '',y = 'Relative expression levels')+
+#     guides()+
+#     ggprism::theme_prism()+
+#     scale_fill_manual(values = c("#69b3a2","#836FFF"))+
+#     theme(axis.title.x = element_blank(),
+#           aspect.ratio = 1.3,
+#           axis.text.x = element_text(angle = 45))+
+#     ggpubr::geom_signif(y_position = get_maxfold(test_res), 
+#                         xmin = rep(1:length(get_ano(test_res))) -0.2, 
+#                         xmax = rep(1:length(get_ano(test_res))) + 0.2,
+#                         annotation = get_ano(test_res),
+#                         tip_length = 0)
 
 DRCTS_res <- tibble(
     dataset = names(DRCTS),

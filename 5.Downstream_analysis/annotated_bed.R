@@ -64,6 +64,15 @@ map(all_DERs,function(file){
     cat(file,'Finished\n')
 },.progress = T)
 
+for (i in list.files('../../data/DERs/')){
+    raw_path <- paste0('../../data/DERs/',i)
+    new_path <- paste0('../../data/downstream_result/',str_extract(i,'sample\\d+'),'/',i)
+    file.copy(raw_path,new_path,overwrite = T)
+}
+
+
+
+
 
 snp_file <- list.files('../../data/downstream_result/',pattern = '.txt',full.names = T,recursive = T) %>% str_subset('snp')
 

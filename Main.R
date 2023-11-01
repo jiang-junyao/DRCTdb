@@ -1,13 +1,7 @@
 library(Seurat)
 library(GenomicRanges)
 ### part1
-merged_matrix <- ReadMtx('../ignore/GSE165837_CARE_ATAC_merged_matrix.mtx.gz',
-                         cells = '../ignore/GSE165837_CARE_ATAC_merged_barcodes.txt.gz',
-                         features = '../ignore/GSE165837_CARE_ATAC_merged_features.txt.gz',
-                         feature.column = 1)
-label <- read.delim("E:/DRCTdb/ignore/GSE165837_CARE_ATAC_merged_umap_cluster_labels.tsv.gz", row.names=1)
-obj <- CreateSeuratObject(merged_matrix,meta.data = label)
-save(merged_matrix,file = '../data/scATAC-seq/sample1/merged_matrix.Rds')
+
 ### part2
 source('2.Data preprocessing/preprocess.R')
 DBRs_gr <- find_DBRs(obj)
@@ -26,9 +20,6 @@ eqtl_gr <- GRanges(paste0(eqtl$CHROM,':',eqtl$POS,'-',eqtl$POS))
 overlapregion <- findOverlaps(DBRs_gr,eqtl_gr)
 overlap_DBRs <- DBRs_gr[overlapregion@from]
 ct_score <- cal_ct_score(overlap_DBRs,DBRs_gr)
-
-
-
 
 
 
@@ -143,7 +134,7 @@ doughnut <- function (x, labels = names(x), edges = 200, outer.radius = 0.8,
 }
 
 clustcol<-c("OrangeRed","SlateBlue3","DarkOrange","GreenYellow","Purple","DarkSlateGray","Gold","DarkGreen","DeepPink2","Red4","#4682B4","#FFDAB9","#708090","#836FFF","#CDC673","#CD9B1D","#FF6EB4","#CDB5CD","#008B8B","#43CD80","#483D8B","#66CD00","#CDC673","#CDAD00","#CD9B9B","#FF8247","#8B7355","#8B3A62","#68228B","#CDB7B5","#CD853F","#6B8E23","#696969","#7B68EE","#9F79EE","#B0C4DE","#7A378B","#66CDAA","#EEE8AA","#00FF00","#EEA2AD","#A0522D","#000080","#E9967A","#00CDCD","#8B4500","#DDA0DD","#EE9572","#EEE9E9","#8B1A1A","#8B8378","#EE9A49","#EECFA1","#8B4726","#8B8878","#EEB4B4","#C1CDCD","#8B7500","#0000FF","#EEEED1","#4F94CD","#6E8B3D","#B0E2FF","#76EE00","#A2B5CD","#548B54","#BBFFFF","#B4EEB4","#00C5CD","#008B8B","#7FFFD4","#8EE5EE","#43CD80","#68838B","#00FF00","#B9D3EE","#9ACD32","#00688B","#FFEC8B","#1C86EE","#CDCD00","#473C8B","#FFB90F","#EED5D2","#CD5555","#CDC9A5","#FFE7BA","#FFDAB9","#CD661D","#CDC5BF","#FF8C69","#8A2BE2","#CD8500","#B03060","#FF6347","#FF7F50","#CD0000","#F4A460","#FFB5C5","#DAA520","#CD6889","#32CD32","#FF00FF","#2E8B57","#CD96CD","#48D1CC","#9B30FF","#1E90FF","#CDB5CD","#191970","#E8E8E8","#FFDAB9")
-cell_num <- shuffle(sample_tissue2$cell_num)
+cell_num <- sample_tissue2$cell_num
 names(cell_num) <- sample_tissue2$tissue
 
 
@@ -158,11 +149,7 @@ for (i in list.files('../../data/downstream_result/')) {
     file.remove(raw_path)
     cat(i,'finished\n')
 }
-for (i in list.files('../../data/DERs/')){
-    raw_path <- paste0('../../data/DERs/',i)
-    new_path <- paste0('../../data/downstream_result/',str_extract(i,'sample\\d+'),'/',i)
-    file.copy(raw_path,new_path,overwrite = T)
-}
+
 
 for (i in list.files('../../data/LDSC_results/',pattern = 'zip')){
     raw_path <- paste0('../../data/LDSC_results/',i)
