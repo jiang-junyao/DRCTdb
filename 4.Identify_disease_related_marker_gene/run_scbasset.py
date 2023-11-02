@@ -10,7 +10,7 @@ import glob
 import os
 import re
 import sys 
-
+from pathlib import Path
 
 
 
@@ -23,7 +23,9 @@ sc.set_figure_params(dpi_save=300,figsize=(4, 4), frameon=False)
 def usage():
     print('Usage: python script.py [input_h5ad]')
 
-def run_scbasset(h5ad,outname,genome = 'hg38'):
+def run_scbasset(h5ad = None,outname = None,genome = 'hg38'):
+    if genome is None:
+        genome = 'hg38'
     adata = sc.read_h5ad(h5ad)
     # compute the threshold: 5% of the cells
     min_cells = int(adata.shape[0] * 0.05)
@@ -85,7 +87,7 @@ def run_scbasset(h5ad,outname,genome = 'hg38'):
     ## output differential open chromtion regions
     sc.tl.rank_genes_groups(adata, 'cell_type', method='wilcoxon')
     DERs = sc.get.rank_genes_groups_df(adata, group = None, log2fc_min  = 1)    
-    DERs.to_csv(f'{outname}_DERs.txt',sep = '\t')
+    DERs.to_csv(f'{outname}/{outname}_DERs.txt',sep = '\t')
     print('Write DERs')
     ##visualization
     # with plt.rc_context():  
@@ -93,7 +95,7 @@ def run_scbasset(h5ad,outname,genome = 'hg38'):
     #     plt.savefig(f"{outname}_umap_plot.svg", dpi = 300,bbox_inches="tight")
 
 
-    motif_file = glob.glob("./data/motifs/shuffled_peaks_motifs/*.fasta")
+    motif_file = glob.glob("/data/kyh/ScBasset/data/motifs/shuffled_peaks_motifs/*.fasta")
     tf_name = [os.path.splitext(os.path.basename(i))[0] for i in motif_file]
     ##Calculate tf_activity
     def get_tf_activity(tf):
@@ -109,10 +111,10 @@ def run_scbasset(h5ad,outname,genome = 'hg38'):
         tf_activity.append(result)
 
     tf_activity_df = pd.DataFrame({tf_name[i]: tf_activity[i] for i in range(len(tf_activity))}, index = adata.obs_names)
-    tf_activity_df.to_csv(f'{outname}_tf_activity.txt',sep = '\t')
+    tf_activity_df.to_csv(f'{outname}/{outname}_tf_activity.txt',sep = '\t')
     print('Write TF activity')
     del adata.varm
-    adata.write(f'{outname}_scbasset.h5ad', compression='gzip')
+    adata.write(f'{outname}/{outname}_scbasset.h5ad', compression='gzip')
     
 
 # def test(input,outname):
@@ -122,16 +124,16 @@ def run_scbasset(h5ad,outname,genome = 'hg38'):
 #         plt.savefig(f"{outname}_umap_plot.svg", dpi = 300,bbox_inches="tight")  
 #     print(f"{outname}_umap_plot.svg")
 #     print('aa')
-
 if __name__ == '__main__':
-    try:      
-        output_prefix =  os.path.splitext(sys.argv[1])[0]
-        out_dir = re.search('\w+',output_prefix).group()
-
+    try:
+        file_path = Path(sys.argv[1])
+        out_dir = re.search('\w+',file_path.stem)[0]
         if not os.path.lexists(out_dir):
             os.makedirs(out_dir)         
-        run_scbasset(sys.argv[1],output_prefix,sys.argv[2])
+
+        run_scbasset(h5ad = file_path,outname = out_dir,genome = sys.argv[2])
 
     except:
         usage()
+
 

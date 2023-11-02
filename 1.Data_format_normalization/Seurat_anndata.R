@@ -171,12 +171,13 @@ sceasy::convertFormat(sample12_ATAC, from="seurat", to="anndata",assay = 'peaks'
                       outFile='../../data/scATAC-seq/sample12/sample12_scATAC-seq_104k_processed.h5ad')
 #sample13----
 sample13_RNA <- readRDS('../../data/scRNA-seq/Sample13/sample13_Bone_marrow_8k.Rds')
-sample13_ATAC <- readRDS('../../data/scATAC-seq/Sample13/sample13_Bone_marrow_ATAC_4k_processed.Rds.rds')
+sample13_ATAC <- readRDS('../../data/scATAC-seq/Sample13/sample13_Bone_marrow_ATAC_4k_processed.Rds')
 sample13_ATAC$cell_type <- sample13_ATAC$predicted.id 
 saveRDS(sample13_ATAC,'../../data/scATAC-seq/Sample13/sample13_Bone_marrow_ATAC_4k_processed.Rds')
 sceasy::convertFormat(sample13_ATAC, from="seurat", to="anndata",assay = 'peaks',
                       outFile='../../data/scATAC-seq/sample13/sample13_scATAC-seq_4k_processed.h5ad')
-
+sceasy::convertFormat(sample13_RNA, from="seurat", to="anndata",assay = 'RNA',
+                      outFile='../../data/scRNA-seq/Sample13/sample13_scRNA_4k_processed.h5ad')
 
 #sample14----
 sample14_ATAC <- readRDS('../../data/scATAC-seq/sample14/sample14_processed_95k_scATAC.Rds')
@@ -267,3 +268,7 @@ saveRDS(sample27_ATAC,file = '../../data/scATAC-seq/Sample27/Sample27_scATAC-seq
 sceasy::convertFormat(sample27_ATAC, from="seurat", to="anndata",assay = 'peaks',
                       outFile='../../data/scATAC-seq/Sample27/Sample27_scATAC-seq_133k_processed.h5ad')
 
+#sample28-----
+sample28_ATAC <- readRDS('../../data/scATAC-seq/Sample28/sample28_scATAC-seq_29k_processed.Rds')
+sceasy::convertFormat(sample28_ATAC, from="seurat", to="anndata",assay = 'peaks',
+                      outFile='../../data/h5ad/Sample28_scATAC-seq_29k_processed.h5ad')

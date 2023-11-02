@@ -48,7 +48,7 @@ peak_anno <- function(reference_GRange, tssRegion = c(-2000, 500),filter = FALSE
     return(peak_gr)
 }
 
-all_DERs <- list.files('../../data/DERs/',full.names = T)
+all_DERs <- list.files('../../data/DERs/',pattern = 'txt$',full.names = T)
 map(all_DERs,function(file){
     df <-
         data.table::fread(file) %>% separate(
@@ -63,6 +63,15 @@ map(all_DERs,function(file){
     data.table::fwrite(df,file = file,sep = '\t')
     cat(file,'Finished\n')
 },.progress = T)
+
+for (i in list.files('../../data/DERs/')){
+    raw_path <- paste0('../../data/DERs/',i)
+    new_path <- paste0('../../data/downstream_result/',str_extract(i,'sample\\d+'),'/',i)
+    file.copy(raw_path,new_path,overwrite = T)
+}
+
+
+
 
 
 snp_file <- list.files('../../data/downstream_result/',pattern = '.txt',full.names = T,recursive = T) %>% str_subset('snp')
