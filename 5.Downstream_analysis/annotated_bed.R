@@ -86,4 +86,13 @@ map(snp_file,function(file){
     data.table::fwrite(df1,file = file,sep = '\t')
 },.progress = T)
 
-
+snp_file <- list.files('../../data/downstream_result/sample28/',pattern = '.txt',full.names = T,recursive = T) %>% str_subset('snp')
+map(snp_file,function(file){
+    df <-
+        data.table::fread(file) 
+    colnames(df)[7] <- 'SNP_location'
+    gr <- df %>% dplyr::select(c(1:3, 11, 7)) %>% dplyr::mutate(seqnames = paste0('chr',seqnames)) %>%
+        makeGRangesFromDataFrame(keep.extra.columns = T) 
+    df1 <-  peak_anno(gr) %>% as.data.frame()  
+    data.table::fwrite(df1,file = file,sep = '\t')
+},.progress = T)
