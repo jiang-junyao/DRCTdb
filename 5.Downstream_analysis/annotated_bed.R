@@ -106,12 +106,12 @@ DER_list <- map(raw_path,data.table::fread)
 DER_list_small <- map(DER_list,function(df){
     if (nrow(df) >1000) {
         df <- df %>% group_by(seqnames) %>% arrange(desc(abs(logfoldchanges))) %>%
-            slice_head(n = 1000) 
+            slice_head(n = 3000) 
     }
     df$logfoldchanges <-  round(df$logfoldchanges,2)
     df$pvals_adj <- round(df$pvals_adj,3)
     return(df)
 })
 for (i in 1:length(DER_list_small)) {
-    data.table::fwrite(DER_list_small[[i]],file = raw_path[i])
+    data.table::fwrite(DER_list_small[[i]],file = raw_path[i],sep = '\t')
 }
