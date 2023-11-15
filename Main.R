@@ -186,3 +186,13 @@ all_downstream_txt <- list.files('../data/downstream_result/',pattern = 'txt|xls
 
 
 res <- map(all_downstream_txt,table2json,.progress = T)
+
+
+
+##basic stats
+
+sheet1 <- readxl::read_excel('../data/scdb_core.xlsx','Sheet1')
+sheet1$`Cell number` |> sum()
+sheet1$`Cell type number` |> sum()
+sheet2 <- readxl::read_excel('../data/scdb_core.xlsx','Sheet2')
+unique(sheet2$tissue) |> length()
