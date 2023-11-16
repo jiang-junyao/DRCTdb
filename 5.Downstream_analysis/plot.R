@@ -192,3 +192,10 @@ plot_main <- function(path_use='E:\\DRCTdb\\ignore\\downstream_result/'
 
   }
 }
+
+##
+pvalue = read.delim('../data/LDSC_results/sample1/pvalues.tsv')
+p1 <- plot_disease_heatmap(pvalue)
+pdf('sample1.pdf', width = 10, height = 10)
+p1
+dev.off()
