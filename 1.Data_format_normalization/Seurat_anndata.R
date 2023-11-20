@@ -272,3 +272,34 @@ sceasy::convertFormat(sample27_ATAC, from="seurat", to="anndata",assay = 'peaks'
 sample28_ATAC <- readRDS('../../data/scATAC-seq/Sample28/sample28_scATAC-seq_29k_processed.Rds')
 sceasy::convertFormat(sample28_ATAC, from="seurat", to="anndata",assay = 'peaks',
                       outFile='../../data/h5ad/Sample28_scATAC-seq_29k_processed.h5ad')
+
+
+
+##
+h5ad_RNA <- list.files('../../data/h5ad/RNA_h5ad/',full.names = T)
+
+
+
+h5ad2Rds <- function(h5ad_RNA){
+    filename = tools::file_path_sans_ext(basename(h5ad_RNA))
+    outfile = paste0('../../data/Rds/',filename,'.Rds')
+    sceasy::convertFormat(h5ad_RNA, from="anndata", to="seurat",outFile= outfile)
+}
+
+h5ad2Rds(h5ad_RNA[1])
+h5ad2Rds(h5ad_RNA[2])
+h5ad2Rds(h5ad_RNA[3])
+h5ad2Rds(h5ad_RNA[4])
+h5ad2Rds(h5ad_RNA[5])
+
+h5ad2Rds(h5ad_RNA[6])
+h5ad2Rds(h5ad_RNA[7])
+h5ad2Rds(h5ad_RNA[8])
+h5ad2Rds(h5ad_RNA[9])
+h5ad2Rds(h5ad_RNA[10])
+
+h5ad2Rds(h5ad_RNA[11])
+h5ad2Rds(h5ad_RNA[12])
+h5ad2Rds(h5ad_RNA[13])
+h5ad2Rds(h5ad_RNA[14])
+h5ad2Rds(h5ad_RNA[15])
