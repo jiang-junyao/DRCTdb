@@ -9,8 +9,13 @@ library(Seurat)
 
 get_cor <- function(df,sce){
     grn <- df %>% select(TF,symbol) %>%separate_rows(TF,sep = ';') 
-    mean_exp <-  rowMeans(sce@assays$RNA@counts/sce$nCount_RNA)
-    mean_exp <- names(mean_exp[which(mean_exp > 0) ])
+    if ('nCount_RNA' %in% sce@meta.data) {
+        mean_exp <-  rowMeans(sce@assays$RNA@counts/sce$nCount_RNA)
+    }else{
+        mean_exp <-  rowMeans(sce@assays$RNA@counts/sce$nCounts_RNA)
+    }
+   
+    mean_exp <- names(mean_exp[which(mean_exp > 0.1) ])
     genes_selected  <-  c(unique(grn$TF),unique(grn$symbol)) %>% 
         intersect(rownames(sce)) %>%  intersect(mean_exp) 
     beta_CSCORE_result <- CSCORE(sce, genes = genes_selected)
@@ -32,6 +37,7 @@ get_cor <- function(df,sce){
     },.progress = T)
     
     refined_grn <- grn %>% filter(cor != 0) %>% filter(abs(cor) > 0.3,TF != symbol ) %>% distinct_all()
+    gc()
     return(refined_grn)
     
 }
@@ -51,7 +57,7 @@ batch_run_cor <- function(file,sce){
     tf_target <- readRDS(file)
     tf_target_with_cor <- get_cor(tf_target,subset_sce)
     out_name <- paste0('../../data/tf_target/',sample,'/',filename,'with_cor.RDS')
-    #saveRDS(tf_target_with_cor,out_name)
+    saveRDS(tf_target_with_cor,out_name)
     cat(out_name,'finished\n')
     return(tf_target_with_cor)
     
@@ -79,4 +85,11 @@ sample1_tf_core <- str_subset(total_rds,'sample1/')
 sample1_cor <- map(
     sample1_tf_core,batch_run_cor,sce = sample1,.progress = T
 )
-
+saveRDS(sample1_cor,'../../data/GRN/sample1_GRN.Rds')
+#sample2----
+sample3 <- readRDS('../../data/Rds/RNA/sample3_atlas_scRNA_600k_processed.Rds')
+sample3_tf_core <- str_subset(total_rds,'sample3/')
+sample3_cor <- map(
+    sample3_tf_core,batch_run_cor,sce = sample3,.progress = T
+)
+saveRDS(sample3_cor,'../../data/GRN/sample3_GRN.Rds')
