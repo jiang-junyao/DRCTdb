@@ -2,6 +2,17 @@
 
 coretable <- readxl::read_excel('scdb_core.xlsx',sheet = 'Sheet3')
 
+download_table <- readxl::read_excel('downlaod_link.xlsx')
+download_table$scRNA <- download_table$`Processed scRNA`
+download_table$`Processed scRNA` <- 'Download data'
+download_table$scATAC <- download_table$`Processed scATAC`
+download_table$`Processed scATAC` <- 'Download data'
+download_table$ldsc <- download_table$`LDSC results`
+download_table$`LDSC results` <- 'Download data'
+
+download_table$`Processed scRNA` <- sprintf('<a href="%s" target="_blank">%s</a>', download_table$scRNA, download_table$`Processed scRNA`)
+download_table$`Processed scATAC` <- sprintf('<a href="%s" target="_blank">%s</a>', download_table$scATAC, download_table$`Processed scATAC`)
+download_table$`LDSC results` <- sprintf('<a href="%s" target="_blank">%s</a>', download_table$ldsc, download_table$`LDSC results`)
 
 
 server <- function(input, output,session = session) {
@@ -11,7 +22,24 @@ server <- function(input, output,session = session) {
             style ='display: inline;'
         )
     })
-
+    
+    #Contact-------
+    output$Contact_text <- renderUI({
+        div(
+            h3('About'),
+            p('We hope you find this data resource useful. Please contact us with your experiences and suggestions'),
+            br(),
+            
+            h3('Contact'),
+            p("If your have any question, please don't hesitate to contact us."),
+            p("Yunhui: kongyunhui1@gmail.com"),
+            p("Junyao:jyjiang@link.cuhk.edu.hk"),
+            br(),
+            h3('Citation'),
+            p("xxx"),
+            style ='display: inline;'
+        )
+    })
     #search-----
     output$coretable = renderDataTable(
         coretable[,c(1,4:6,9)],
@@ -26,6 +54,20 @@ server <- function(input, output,session = session) {
     )
     #unique(coretable$Dataset)
     #core_table_rows_selected
+    output$download_table = renderDataTable(
+        download_table[, c("Study name", "dataset", "Sample", "Processed scRNA", "Processed scATAC", "LDSC results")],
+        rownames =FALSE,
+        selection = 'none',
+        server = TRUE,
+        escape = FALSE,
+        options = list(
+            autoWidth = FALSE,
+            pageLength = 16,
+            searching = FALSE,
+            lengthChange = FALSE)
+    )
+    
+    
     output$seleted_row = renderPrint({
         s = input$coretable_rows_selected
         if (length(s)) {
@@ -48,9 +90,9 @@ server <- function(input, output,session = session) {
         }
     })
 
-    output$test <- renderText({
-        Select_dataseted()
-    })
+    # output$test <- renderText({
+    #     Select_dataseted()
+    # })
     output$study_name <- renderText({
         s = input$coretable_rows_selected
         if (length(s)) {
@@ -240,14 +282,26 @@ server <- function(input, output,session = session) {
         grn_path = list.files(path = paste0('downstream_result/',Select_dataset,'/grn_cor02'),pattern = gsub(' ','_',input$disease),full.names = TRUE) %>% 
             stringr::str_subset(gsub(' ','_',input$ct)) %>%
             stringr::str_subset('Rds')
-        print(grn_path)
         grn <- readRDS(grn_path)
         return(grn)
     })
     output$grn_output <-  networkD3::renderForceNetwork({
-        networkD3::forceNetwork(Links = grn_file()$link, Nodes = grn_file()$nodes,
+        grn1 <- networkD3::forceNetwork(Links = grn_file()$link, Nodes = grn_file()$nodes,
                      Source = "source", Target = "target",fontSize = 10,
                      Value = "value", NodeID = "gene",zoom = TRUE,arrows =TRUE,
                      Group = "group2", opacity = 0.8)
+        htmlwidgets::onRender(grn1, "
+          function(el, x) {
+            // 选择所有节点并为每个节点添加文本标签
+            d3.select(el).selectAll('.node').append('text')
+              .attr('dx', 12)
+              .attr('dy', '.35em')
+              .text(function(d) { return d.name; }) // 确保这里使用正确的属性来显示名称
+              .style('font-size', '10px')
+              .attr('class', 'node-label');
+          }
+        ")
     })
+    
+    
 }

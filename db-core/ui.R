@@ -27,7 +27,7 @@ ui <-
               div(class = 'home',
               fluidPage(
                   card(
-                      card_header("Introduction",class = "Introduction"),
+                      card_header("Introduction",class = "Introduction", style = "font-size: 24px;"),
                       status = "primary",
                       width = 12,
                       height = NULL,
@@ -40,7 +40,7 @@ ui <-
                       fill = FALSE,
                       value_box(
                           "Total cell",
-                          '>2.6 Milions',
+                          '>4 Milions',
                           showcase = bsicons::bs_icon("Egg fried", size = NULL),
                           style = 'background-color: #5092D0!important;'
                       ),
@@ -77,8 +77,8 @@ ui <-
                        div(DT::dataTableOutput('coretable',width = "100%"))
                    ),
                    card(
-                       actionButton("go_to_panel", "Expore dataset....",class = 'jump'),
-                       textOutput('test')
+                       actionButton("go_to_panel", "Expore dataset....",class = 'jump')
+                       #textOutput('test')
                    )
 
                     ),style = "font-size:120%;width:80%;")
@@ -148,19 +148,36 @@ ui <-
               ),
 
     ###Online tools-----
-    tabPanel(title = "Online tools",
-              icon = icon('cloud')
-              ),
 
     tabPanel(title = "Tutorials", 
               icon = icon('bookmark',lib = 'glyphicon'),
               p("Second tab content.")),
     tabPanel(title = "Download", 
               icon = icon('download',lib = 'glyphicon'),
-              p("Third tab content")),
+             fluidPage(
+                 div(
+                     card(
+                         card_header("Dataset overview"),
+                         div(DT::dataTableOutput('download_table',width = "100%"))
+                     )
+                     
+                 ),style = "font-size:120%;width:80%;")
+             )
+             ,
     tabPanel(title = "Contact",
               icon =  icon('envelope',lib = 'glyphicon'),
-              p("Third tab content")),
+             fluidPage(
+                 card(
+                     card_header("Contact us",class = "Introduction", style = "font-size:200%;line-height: 150%; padding: 20px;"),
+                     status = "primary",
+                     width = 10,
+                     height = NULL,
+                     card_body(
+                         uiOutput("Contact_text")
+                     )
+                     
+                 ),style = "font-size:120%;width:80%;")
+             ),
     nav_spacer(),
     nav_item(tags$a(shiny::icon("github"), "DRCTDB", href = "https://github.com/jiang-junyao/DRCTdb", target = "_blank"))
 )

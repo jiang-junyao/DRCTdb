@@ -127,3 +127,41 @@ test <- readRDS('downstream_result/sample10/grn_cor02/aDC_Area_under_the_curve_o
 #              Source = "source", Target = "target",fontSize = 10,
 #              Value = "value", NodeID = "gene",zoom = TRUE,arrows =TRUE,
 #              Group = "group2", opacity = 0.8)
+##Process db file(remove un exist cell type and disease)
+drct_file <- list.files('./downstream_result/',recursive = T,pattern = 'related_disease.xls',full.names = T)
+
+map(drct_file,function(files){
+    drct <- fread(files)
+    row_index <- which(str_detect(drct$Disease,'Myocardial fractal dimension'))
+    if (length(row_index) > 0) {
+        drct$Disease[row_index] <- stringr::str_extract(drct$Disease[row_index],'[\\s\\w]+')
+        fwrite(drct,file = files,sep = '\t')
+    }
+},.progress = T)
+
+
+all_drct <- map_dfr(drct_file,function(files){
+    drct <- fread(files)
+    row_index <- which(str_detect(drct$`Cell type`,'FB2$'))
+    if (length(row_index) > 0) {
+        drct <- drct[-row_index,]
+        fwrite(drct,file = files,sep = '\t')
+        return(drct)
+    }else{
+        fwrite(drct,file = files,sep = '\t')
+        return(drct)
+    }
+})
+
+
+
+
+all_Myocardial_fractal <- list.files('downstream_result/',recursive = T,pattern = 'Myocardial_fractal_dimension',full.names = T)
+for (file in all_Myocardial_fractal) {
+    dir_name <- dirname(file)
+    file_suffix <- tools::file_ext(file)
+    base_name <- basename(file)
+    new_base_name <- str_extract(base_name,'\\w+')
+    new_name <- paste0(dir_name,'/',new_base_name,'.',file_suffix)
+    file.rename(from = file,to = new_name)
+}
