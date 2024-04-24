@@ -1,20 +1,5 @@
 
 
-coretable <- readxl::read_excel('scdb_core.xlsx',sheet = 'Sheet3')
-
-download_table <- readxl::read_excel('downlaod_link.xlsx')
-download_table$scRNA <- download_table$`Processed scRNA`
-download_table$`Processed scRNA` <- 'Download data'
-download_table$scATAC <- download_table$`Processed scATAC`
-download_table$`Processed scATAC` <- 'Download data'
-download_table$ldsc <- download_table$`LDSC results`
-download_table$`LDSC results` <- 'Download data'
-
-download_table$`Processed scRNA` <- sprintf('<a href="%s" target="_blank">%s</a>', download_table$scRNA, download_table$`Processed scRNA`)
-download_table$`Processed scATAC` <- sprintf('<a href="%s" target="_blank">%s</a>', download_table$scATAC, download_table$`Processed scATAC`)
-download_table$`LDSC results` <- sprintf('<a href="%s" target="_blank">%s</a>', download_table$ldsc, download_table$`LDSC results`)
-
-
 server <- function(input, output,session = session) {
     #HOME-------
     output$HOME_output_text <- renderUI({
@@ -160,22 +145,45 @@ server <- function(input, output,session = session) {
     }
     )
     
+    tf_activity <- reactive({
+        s = input$coretable_rows_selected
+        if (length(s)) {
+            Select_dataset =  coretable[s,]$Sample
+        }else{
+            Select_dataset = 'sample1'
+        }
+        file_dir <- list.files(paste0('downstream_result/',Select_dataset),pattern = 'tf_activity',full.names = T)
+        df <- data.table::fread(file_dir)
+        colnames(df) <- c('Cell type','TF')
+        return(df)
+    })
+    output$show_tf_activity<- renderDT({
+        tf_activity()
+    }
+    )
+    
+    
     ##right side-----
-    output$dropdown  <- renderUI({
+    output$dropdown <- renderUI({
         fluidRow(
             selectInput(inputId = 'ct',
                         label = 'Choose Cell type',
                         choices = unique(drcttable()[[2]]),
                         selected = unique(drcttable()[[2]])[1],
-                        width = '300px'),
-            
-            selectInput(inputId = 'disease',
-                        label = 'Choose disease',
-                        choices = unique(drcttable()[[1]]),
-                        selected = unique(drcttable()[[1]])[1],
                         width = '300px')
         )
-        })
+    })
+    
+   
+    output$diseaseDropdown <- renderUI({
+        if (is.null(input$ct)) return(NULL)  
+        selectInput(inputId = 'disease',
+                    label = 'Choose disease',
+                    choices = unique(drcttable()[drcttable()[[2]] == input$ct, ][[1]]),
+                    selected = unique(drcttable()[drcttable()[[2]] == input$ct, ][[1]])[1],
+                    width = '300px')
+    })
+    
     ###ccc
     output$show_ccc_plot <- renderImage({
         s = input$coretable_rows_selected

@@ -12,7 +12,7 @@ options(shiny.maxRequestSize=1024*1024^2)
 # readxl::read_excel('scdb_core.xlsx',sheet = 'Sheet1') %>% 
 #     tidyr::separate_rows(Tissue,sep = ';') %>% pull(Tissue) |> unique() |> length()
 #Total tissue number
-coretable <- readxl::read_excel('scdb_core.xlsx',sheet = 'Sheet3')
+
 
 ui <- 
     navbarPage(
@@ -52,7 +52,7 @@ ui <-
                       ),
                       value_box(
                           "Total disease",
-                          '48',
+                          '42',
                           showcase = bsicons::bs_icon("universal-access", size = NULL),
                           style = 'background-color: #ea9c9d!important;'
                       )
@@ -60,7 +60,7 @@ ui <-
                   ),
                   tags$br(),
                   card(
-                      card_image(file = "www/DRCTDB workflow_A4.jpg" ),
+                      card_image(file = "www/intro_img.png" ),
                       style = 'background:#FFFFFF'
                   ),
                   style = "font-size:150%;width:80%;"
@@ -110,11 +110,17 @@ ui <-
                           ),
                           nav_panel("DAR",
                                     div(DT::dataTableOutput('show_DER_table',width = "100%"))
+                          ),
+                          nav_panel("TF activity",
+                                    div(DT::dataTableOutput('show_tf_activity',width = "100%"))
                           )
                       ),
                       navset_card_tab(
                           title = div(class = 'select disease',
-                                        uiOutput('dropdown')
+                                      fluidRow(
+                                          column(6, uiOutput("dropdown")),          
+                                          column(6, uiOutput("diseaseDropdown"))    
+                                      )
                                       ),
                           id = "tabset1", height = "800px",
                           full_screen = TRUE,
@@ -151,7 +157,8 @@ ui <-
 
     tabPanel(title = "Tutorials", 
               icon = icon('bookmark',lib = 'glyphicon'),
-              p("Second tab content.")),
+             tags$iframe(src="Tutorial.pdf", width = "80%", height = "800px")
+             ),
     tabPanel(title = "Download", 
               icon = icon('download',lib = 'glyphicon'),
              fluidPage(
