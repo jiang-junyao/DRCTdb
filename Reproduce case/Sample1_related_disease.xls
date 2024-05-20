@@ -1,0 +1,5 @@
+Disease	Cell type	p value
+Atrial fibrillation	vCM	1.62096572194e-07
+Atrial fibrillation	aCM	5.34615453875e-05
+Myocardial fractal dimension (slices 1-9)	vCM	0.000330547271499
+Myocardial fractal dimension (slices 1-9)	aCM	0.000458194983915
