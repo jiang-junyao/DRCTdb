@@ -8,9 +8,9 @@ Run code in 01.Create_seurat_object.R
 
 Will generate 2 seurat object (scRNA and scATAC) which contain peak-by-cell matrix and gene-by-cell matrix
 
-Convert scATAC seurat object to h5ad for python analysis.
+Then convert scATAC seurat object to h5ad for python analysis.
 
-Many package can finish this. We using [dior](https://github.com/JiekaiLab/scDIOR) here.
+Many package can done for this. We using [scdior](https://github.com/JiekaiLab/scDIOR) here.
 
 After the conversion, we load it with scanpy to make sure its integrality(For all dataset, your can see the code in 1.Data_format_normalization/rds2h5ad.ipynb)
 
