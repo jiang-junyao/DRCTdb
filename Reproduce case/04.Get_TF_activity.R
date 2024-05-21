@@ -34,3 +34,7 @@ TF_act_metadata <-
     summarise(across(where(is.numeric), sum)) %>%
     dplyr::select(c('cell_type', colnames(TF_act)[-1]))
 tf_activity <- get_celltype_TF_act(TF_act_metadata)
+data.table::fwrite(tf_activity, file = 'Sample1_tf_activity.xls',sep = '\t')
+
+
+
