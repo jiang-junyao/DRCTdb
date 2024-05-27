@@ -62,5 +62,5 @@ your will obtained the 10 most active transcription factors in each cell type in
 
 Based on ldsc result, we perform the following 4 analysis to decode the mechanisms among disease realted cell types: (1) identify disease asscoiated peaks (from scATAC) and genes (from scRNA) (2) enrichment analysis for peaks and genes from step1 (3) construct cell-type-specific gene regulatory network in disease related cell types (4) perform cell-cell communications analysis among disease related cell types.
 
-Here is the test codes for downstream analysis, before run the test code, you need to download the inputs form this [link]()
+Here is the test codes for downstream analysis, before run the test code, you need to download the inputs form this [link](https://drctdb.cowtransfer.com/s/b841942cc19549)
 >05.downstream_analysis.html or 05.downstream_analysis.rmd
