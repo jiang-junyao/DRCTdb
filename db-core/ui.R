@@ -7,6 +7,7 @@ library(DT)
 library(shinyjqui)
 library(shinyWidgets)
 library(networkD3)
+library(shinybusy)
 options(shiny.maxRequestSize=1024*1024^2)
 
 # readxl::read_excel('scdb_core.xlsx',sheet = 'Sheet1') %>% 
@@ -110,6 +111,7 @@ ui <-
                           ),
                           nav_panel("DAR",
                                     div(DT::dataTableOutput('show_DER_table',width = "100%"))
+                                    
                           ),
                           nav_panel("TF activity",
                                     div(DT::dataTableOutput('show_tf_activity',width = "100%"))
@@ -124,7 +126,7 @@ ui <-
                                       ),
                           id = "tabset1", height = "800px",
                           full_screen = TRUE,
-                          nav_panel("CCC",
+                          nav_panel("Cell-Cell communication",
                                         switchInput(
                                             inputId = "switchccc",
                                             label = '-To-',
@@ -133,22 +135,22 @@ ui <-
                                             offLabel = "Table",
                                             size = 'normal'
                                         ),
-                                    div(uiOutput('show_ccc'),style = "margin-left: auto; margin-right: auto;")
+                                    div(uiOutput('show_ccc'))
                                    
                           ),
-                          nav_panel("ATAC",
-                                    div(uiOutput('show_atac_enrich'),style = "margin-left: auto; margin-right: auto;")
+                          nav_panel("SNP overlapped peaks",
+                                    div(uiOutput('show_atac_enrich'))
                           ),
-                          nav_panel('RNA',
-                                    div(uiOutput('show_rna_enrich'),style = "margin-left: auto; margin-right: auto;")
+                          nav_panel('SNP overlapped RNA',
+                                    div(uiOutput('show_rna_enrich'))
                           ),
-                          nav_panel("GRN",
+                          nav_panel("Gene Regulatory Networks",
                                    div(forceNetworkOutput("grn_output"))
                           )
 
                       )
                   ),
-                  style = "font-size:150%;width:100%;"
+                  style = "font-size:120%;width:100%;"
               )
 
               ),
@@ -159,6 +161,29 @@ ui <-
               icon = icon('bookmark',lib = 'glyphicon'),
              tags$iframe(src="Tutorial.pdf", width = "80%", height = "800px")
              ),
+    tabPanel(title = "Online Enrichment", 
+             icon = icon('wrench',lib = 'glyphicon'),
+             
+             fluidPage(
+                 
+             card(
+                 card_header("Online GO enrichment tools"),
+                 h3(HTML("Please upload an excel file (xls or xlsx) that has the columns of <b>symbol</b>")),
+                 add_busy_bar(color = "#FF0000"),
+                 fluidRow(
+                     div(class = "flex-container",
+                         fileInput("enrich_upload", NULL, buttonLabel = "Upload...", multiple = FALSE, accept = c(".xls", ".xlsx")),
+                         downloadButton("download_enrich_data", "Download results")
+                     )
+                 ),
+                 div(DT::dataTableOutput("enrichres_table"),style = "height: 600px;"),
+                 
+                 
+             ),style = "font-size:100%;width:80%;"
+
+             )
+    ),
+    
     tabPanel(title = "Download", 
               icon = icon('download',lib = 'glyphicon'),
              fluidPage(

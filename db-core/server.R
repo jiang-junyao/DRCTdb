@@ -219,8 +219,28 @@ server <- function(input, output,session = session) {
         return(df)
     })
     output$show_ccc_table <- renderDT({
-        ccc_table()
-    }
+        #ccc_table()
+        datatable(
+            ccc_table(),
+            extensions = 'Buttons',
+            options = list(
+                dom = 'Bfrtip',
+                buttons = list(
+                    list(
+                        extend = 'excel',
+                        text = 'Download to Excel',
+                        filename = 'CCC_table',
+                        title = '', 
+                        messageTop = '',  
+                        messageBottom = '',
+                        exportOptions = list(
+                            modifier = list(page = "all")
+                        )
+                    )
+                )
+            )
+        )
+    },server = FALSE
     )
     output$show_ccc <-  renderUI({
         if (input$switchccc) {
@@ -228,6 +248,7 @@ server <- function(input, output,session = session) {
         }else{
             DT::dataTableOutput('show_ccc_table',width = "100%")
         }
+        
     })
     
     ###atac
@@ -249,8 +270,28 @@ server <- function(input, output,session = session) {
         return(df)
     })
     output$atac_table <- renderDT({
-        atac_table()
-    })
+        #atac_table()
+        datatable(
+            atac_table(),
+            extensions = 'Buttons',
+            options = list(
+                dom = 'Bfrtip',
+                buttons = list(
+                    list(
+                        extend = 'excel',
+                        text = 'Download to Excel',
+                        filename = 'ATAC_table',
+                        title = '', 
+                        messageTop = '',  
+                        messageBottom = '',
+                        exportOptions = list(
+                            modifier = list(page = "all")
+                        )
+                    )
+                )
+            )
+        )
+    },server = FALSE)
     output$show_atac_enrich <-  renderUI({
         DT::dataTableOutput('atac_table',width = "100%")
     })
@@ -272,8 +313,29 @@ server <- function(input, output,session = session) {
         return(df)
     })
     output$rna_table <- renderDT({
-        rna_table()
-    })
+        #rna_table()
+        
+        datatable(
+            rna_table(),
+            extensions = 'Buttons',
+            options = list(
+                dom = 'Bfrtip',
+                buttons = list(
+                    list(
+                        extend = 'excel',
+                        text = 'Download to Excel',
+                        filename = 'rna_table',
+                        title = '', 
+                        messageTop = '',  
+                        messageBottom = '',
+                        exportOptions = list(
+                            modifier = list(page = "all")
+                        )
+                    )
+                )
+            )
+        )
+    },server=FALSE)
     output$show_rna_enrich <-  renderUI({
         DT::dataTableOutput('rna_table',width = "100%")
     })
@@ -311,5 +373,44 @@ server <- function(input, output,session = session) {
         ")
     })
     
+    
+    ###tools part 
+    enrich_data <- reactive({
+        req(input$enrich_upload)
+        ext <- tools::file_ext(input$enrich_upload$name)
+        #print(input$enrich_upload$datapath)
+        enriched_data <- switch(ext,
+               xls = readxl::read_xls(input$enrich_upload$datapath),
+               xlsx = readxl::read_xlsx(input$enrich_upload$datapath)
+               #validate("Invalid file; Please upload a .xls or .xlsx file")
+        )
+        colnames(enriched_data) <- toupper(colnames(enriched_data))
+        return(enriched_data)
+    })
+    
+    enrich_res <- reactive({
+        req(input$enrich_upload)
+        #enrichres()
+        if ("SYMBOL"  %in% toupper(colnames(enrich_data()))){
+            enrich_GO(enrich_data())
+        }else{
+            stop('Must have SYMBOL columns')
+        }
+    })
+    output$enrichres_table <- renderDataTable({
+        req(input$enrich_upload)
+        datatable(enrich_res()[[1]])
+    })
+    
+    
+    output$download_enrich_data <- downloadHandler(
+        filename = function() {
+            paste("enriched_reasuts", Sys.Date(), ".xlsx", sep = "")
+        },
+        content = function(file) {
+            writexl::write_xlsx(enrich_res(), file)
+        }
+    )
+
     
 }
