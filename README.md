@@ -21,6 +21,6 @@ Disease related cell type analysis to decode cell type effect and underlying r
    - (IV) When scATAC-seq data is available, integrating Pearson correlation and TF-target result of part IIII to reconstruct cell type-specific gene regulatory network. When scATAC-seq data is not available, using [SCENIC](https://scenicplus.readthedocs.io/en/latest/index.html) to reconstruct cell type-specific diseased related gene regulatory network.
 
 
-We offer a step-by-step tutorials to preprocess single cell multiomics data in **reproduce_case folder**
+We also have a step-by-step tutorials to preprocess single cell multiomics data in **reproduce_case folder**
 
 DRCTDB is a fully open-source database, where users can download the entire project and run locally at **db-core folder**
