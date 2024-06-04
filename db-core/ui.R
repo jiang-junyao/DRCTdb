@@ -139,10 +139,26 @@ ui <-
                                    
                           ),
                           nav_panel("SNP overlapped peaks",
-                                    div(uiOutput('show_atac_enrich'))
+                                    switchInput(
+                                        inputId = "switchatac",
+                                        label = '-To-',
+                                        value = TRUE,
+                                        onLabel = "Figure",
+                                        offLabel = "Table",
+                                        size = 'normal'
+                                    ),
+                                    div(uiOutput('show_atac_enrich'),class = "centered-image")
                           ),
-                          nav_panel('SNP overlapped RNA',
-                                    div(uiOutput('show_rna_enrich'))
+                          nav_panel('SNP overlapped genes',
+                                    switchInput(
+                                        inputId = "switchrna",
+                                        label = '-To-',
+                                        value = TRUE,
+                                        onLabel = "Figure",
+                                        offLabel = "Table",
+                                        size = 'normal'
+                                    ),
+                                    div(uiOutput('show_rna_enrich'),class = "centered-image")
                           ),
                           nav_panel("Gene Regulatory Networks",
                                    div(forceNetworkOutput("grn_output"))
@@ -169,6 +185,8 @@ ui <-
              card(
                  card_header("Online GO enrichment tools"),
                  h3(HTML("Please upload an excel file (xls or xlsx) that has the columns of <b>symbol</b>")),
+                 h4(HTML("We offer a preview of the enriched table of biological processes. For molecular process and cellular component enrichment, 
+                         you can click the <b>download</b> button to download an Excel file containing all the results.")),
                  add_busy_bar(color = "#FF0000"),
                  fluidRow(
                      div(class = "flex-container",
@@ -190,7 +208,11 @@ ui <-
                  div(
                      card(
                          card_header("Dataset overview"),
-                         div(DT::dataTableOutput('download_table',width = "100%"))
+                         div(  tags$h2(
+                             "All data can also download in ",
+                             tags$a(href = "https://zenodo.org/records/11362883", "zenodo",target = "_blank")
+                            ),
+                             DT::dataTableOutput('download_table',width = "100%"),)
                      )
                      
                  ),style = "font-size:120%;width:80%;")

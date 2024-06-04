@@ -12,8 +12,8 @@ download_table$scRNA <- download_table$`Processed scRNA`
 download_table$`Processed scRNA` <- 'Download data'
 download_table$scATAC <- download_table$`Processed scATAC`
 download_table$`Processed scATAC` <- 'Download data'
-download_table$ldsc <- download_table$`LDSC results`
-download_table$`LDSC results` <- 'Download data'
+#download_table$ldsc <- download_table$`LDSC results`
+#download_table$`LDSC results` <- 'Download data'
 
 enrich_GO <- function(df){
     dbs <- c("GO_Biological_Process_2023", "GO_Cellular_Component_2023", "GO_Molecular_Function_2023")
@@ -24,9 +24,16 @@ enrich_GO <- function(df){
 # 创建下载链接
 download_table$`Processed scRNA` <- sprintf('<a href="%s" target="_blank">%s</a>', download_table$scRNA, download_table$`Processed scRNA`)
 download_table$`Processed scATAC` <- sprintf('<a href="%s" target="_blank">%s</a>', download_table$scATAC, download_table$`Processed scATAC`)
-download_table$`LDSC results` <- sprintf('<a href="%s" target="_blank">%s</a>', download_table$ldsc, download_table$`LDSC results`)
+
+#download_table$`LDSC results` <- sprintf('<a href="%s" target="_blank">%s</a>', download_table$ldsc, download_table$`LDSC results`)
 
 
 #library(org.Hs.eg.db)
 #AnnotationDbi::saveDb(org.Hs.eg.db, "org_HS.sqlite")
 #org.Hs.eg.db <- AnnotationDbi::loadDb('org_HS.sqlite')
+#PDPN
+
+
+
+
+

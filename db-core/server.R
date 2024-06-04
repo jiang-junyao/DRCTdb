@@ -40,7 +40,7 @@ server <- function(input, output,session = session) {
     #unique(coretable$Dataset)
     #core_table_rows_selected
     output$download_table = renderDataTable(
-        download_table[, c("Study name", "dataset", "Sample", "Processed scRNA", "Processed scATAC", "LDSC results")],
+        download_table[, c("Study name","dataset", "Sample", "Processed scRNA", "Processed scATAC",'PMID')],
         rownames =FALSE,
         selection = 'none',
         server = TRUE,
@@ -269,6 +269,7 @@ server <- function(input, output,session = session) {
         df <- df[,c(1,6,7,9,10,11)]
         return(df)
     })
+    
     output$atac_table <- renderDT({
         #atac_table()
         datatable(
@@ -292,9 +293,36 @@ server <- function(input, output,session = session) {
             )
         )
     },server = FALSE)
+    
+    output$show_atac_plot <- renderImage({
+        s = input$coretable_rows_selected
+        if (length(s)) {
+            Select_dataset =  coretable[s,]$Sample
+        }else{
+            Select_dataset = 'sample1'
+        }
+        
+        atac_png_path = list.files(path = paste0('downstream_result/',Select_dataset,'/atac_snp'),pattern = gsub(' ','_',input$disease),full.names = TRUE) %>% 
+            stringr::str_subset(gsub(' ','_',input$ct)) %>%
+            stringr::str_subset('png')
+        
+        list(
+            src = atac_png_path,
+            width = 800
+        )
+    }, deleteFile = FALSE)
+    
     output$show_atac_enrich <-  renderUI({
-        DT::dataTableOutput('atac_table',width = "100%")
+        if (input$switchatac) {
+            imageOutput("show_atac_plot")
+        }else{
+            DT::dataTableOutput('atac_table',width = "100%")
+        }
+        
     })
+    
+    
+    
     ###rna
     rna_table <- reactive({
         s = input$coretable_rows_selected
@@ -336,9 +364,40 @@ server <- function(input, output,session = session) {
             )
         )
     },server=FALSE)
+    
+    output$show_rna_plot <- renderImage({
+        s = input$coretable_rows_selected
+        if (length(s)) {
+            Select_dataset =  coretable[s,]$Sample
+        }else{
+            Select_dataset = 'sample1'
+        }
+        
+        rna_png_path = list.files(path = paste0('downstream_result/',Select_dataset,'/rna_snp'),pattern = gsub(' ','_',input$disease),full.names = TRUE) %>% 
+            stringr::str_subset(gsub(' ','_',input$ct)) %>%
+            stringr::str_subset('png')
+        
+        list(
+            src = rna_png_path,
+            width = 800
+        )
+    }, deleteFile = FALSE)
+    
     output$show_rna_enrich <-  renderUI({
-        DT::dataTableOutput('rna_table',width = "100%")
+        if (input$switchrna) {
+            imageOutput("show_rna_plot")
+        }else{
+            DT::dataTableOutput('rna_table',width = "100%")
+        }
+        
+        
+        
     })
+    
+    
+    
+    
+    
     
     ##grn
     grn_file <- reactive({
