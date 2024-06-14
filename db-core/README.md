@@ -4,4 +4,4 @@ This is the core code of DRCTdb, for local running, your can download the whole 
 
 tar -zxvf DRCTDB.tar.gz 
 
-Using Rstudio to runn this shiny app
+Using Rstudio to run this shiny app locally
