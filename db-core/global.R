@@ -21,10 +21,10 @@ enrich_GO <- function(df){
     return(enriched)
 }
 
-# 创建下载链接
+# give load link
 download_table$`Processed scRNA` <- sprintf('<a href="%s" target="_blank">%s</a>', download_table$scRNA, download_table$`Processed scRNA`)
 download_table$`Processed scATAC` <- sprintf('<a href="%s" target="_blank">%s</a>', download_table$scATAC, download_table$`Processed scATAC`)
-
+download_table$dataset <- sprintf('<a href="%s" target="_blank">%s</a>', download_table$Source,download_table$dataset)
 #download_table$`LDSC results` <- sprintf('<a href="%s" target="_blank">%s</a>', download_table$ldsc, download_table$`LDSC results`)
 
 
