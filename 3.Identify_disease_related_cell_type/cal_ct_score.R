@@ -72,6 +72,7 @@ data.table::fwrite(core_table,file = '../../data/LDSC_results/DRCTS_core_table.x
 
 
 
+
 DRCT_stat <- tibble(
     dataset = names(DRCTS),
     num = map_int(DRCTS,length),
@@ -94,6 +95,40 @@ cairo_pdf('../../data/enriched_disease2.pdf',width = 4,height = 2.5)
 p1
 dev.off()
 
+
+
+
+all_drct <- map_dfr(drct_file,function(files){
+    drct <- fread(files) %>% mutate(sample = tools::file_path_sans_ext(basename(files)))}
+    )
+all_drct$sample <- str_extract(all_drct$sample,'sample\\d+')
+all_drct <- all_drct %>% select(sample,Disease) %>%
+    distinct_all() %>%
+    group_by(sample) %>%
+    mutate(number = 1:n()) %>%
+    group_by(sample) %>%
+    summarise(number = max(number))
+
+core_table <- readxl::read_excel('scdb_core.xlsx')
+
+all_drct_full <- left_join(all_drct,core_table[,2:3],by = c('sample' = 'Sample')) %>%
+    mutate(order = as.numeric(str_extract(dataset,'\\d+'))) %>%
+    arrange(order)
+all_drct_full$dataset <- factor(all_drct_full$dataset,levels = all_drct_full$dataset)
+p1 <- ggplot(all_drct_full,aes(dataset,number,fill = dataset)) +
+    labs(x = 'dataset', y = 'Enriched diease numbers') +
+    geom_bar(stat = "identity",position = position_dodge(width = 1)) +
+    scale_y_continuous(expand = c(0,0)) +
+    scale_x_discrete(labels = c(1:nrow(all_drct_full))) +
+    scale_fill_manual(values = clustcol[1:nrow(all_drct_full)]) +
+    theme_test() +
+    guides(fill = F) 
+p1
+cairo_pdf('../../data/enriched_disease2.pdf',width = 4,height = 2.5)
+p1
+dev.off()
+
+
 # ggplot(test_res,aes(gene_name,Fold,fill= sample)) + 
 #     geom_bar(stat = "identity",position = position_dodge(width = 1)) + theme_classic() +
 #     geom_errorbar(aes(ymin = Fold - SD, ymax = Fold + SD),
@@ -111,10 +146,25 @@ dev.off()
 #                         xmax = rep(1:length(get_ano(test_res))) + 0.2,
 #                         annotation = get_ano(test_res),
 #                         tip_length = 0)
+all_drct <- map_dfr(drct_file,function(files){
+    drct <- fread(files) %>% mutate(sample = tools::file_path_sans_ext(basename(files)))}
+)
+all_drct$sample <- str_extract(all_drct$sample,'sample\\d+')
+all_drct_full <- left_join(all_drct,core_table[,2:3],by = c('sample' = 'Sample')) %>%
+    dplyr::select(dataset,Disease )  %>%
+    distinct_all()
+
+drct_list <- all_drct_full %>% group_split(dataset)
+DRCTS_res <- map(drct_list,function(df){
+    df$Disease
+})
+names(DRCTS_res) <- map_chr(drct_list,function(df){
+    unique(df$dataset)
+})
 
 DRCTS_res <- tibble(
-    dataset = names(DRCTS),
-    disease = map_chr(DRCTS,function(x){
+    dataset = names(DRCTS_res),
+    disease = map_chr(DRCTS_res,function(x){
         if(length(x) > 3){
             x <- x[1:3]
             x <- paste0(x,collapse = ';') %>% paste0('...')
