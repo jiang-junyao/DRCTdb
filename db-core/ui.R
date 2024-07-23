@@ -37,6 +37,16 @@ ui <-
                       )
 
                   ),
+                  card(
+                      card_header("News",class = "Introduction", style = "font-size: 24px;"),
+                      status = "Warning",
+                      width = 12,
+                      height = NULL,
+                      card_body(
+                          HTML('2024.6.20 The initial release of DRCTdb has been published.')
+                      )
+                      
+                  ),
                   layout_columns(
                       fill = FALSE,
                       value_box(
@@ -64,6 +74,8 @@ ui <-
                       card_image(file = "www/intro_img.png" ),
                       style = 'background:#FFFFFF'
                   ),
+                  
+                  
                   style = "font-size:150%;width:80%;"
               )
               )
@@ -209,7 +221,7 @@ ui <-
                      card(
                          card_header("Dataset overview"),
                          div(  tags$h2(
-                             "All data can also download in ",
+                             "All data can also be downloaded from",
                              tags$a(href = "https://zenodo.org/records/11362883", "zenodo",target = "_blank")
                             ),
                              DT::dataTableOutput('download_table',width = "100%"),)

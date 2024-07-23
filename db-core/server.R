@@ -195,7 +195,9 @@ server <- function(input, output,session = session) {
         
         ccc_path = list.files(path = paste0('downstream_result/',Select_dataset,'/ccc/'),pattern = gsub(' ','_',input$disease),full.names = TRUE) %>% 
             stringr::str_subset('svg')
-
+        if (length(ccc_path) == 0) {
+          ccc_path = 'www/CCC_error.png'
+        }
         list(
             src = ccc_path,
             width = 600
@@ -212,7 +214,9 @@ server <- function(input, output,session = session) {
         
         ccc_tabe_path = list.files(path = paste0('downstream_result/',Select_dataset,'/ccc/'),pattern = gsub(' ','_',input$disease),full.names = TRUE) %>% 
             stringr::str_subset('txt')
-
+        if (length(ccc_tabe_path) == 0) {
+          ccc_tabe_path = 'www/ccc_error.txt'
+        }
         df <- data.table::fread(ccc_tabe_path)
         df <- df[,c(12,7,10,11,13)]
         df$prob.original <- signif(df$prob.original,digits =3)
