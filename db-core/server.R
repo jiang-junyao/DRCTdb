@@ -11,12 +11,16 @@ server <- function(input, output,session = session) {
     #Contact-------
     output$Contact_text <- renderUI({
         div(
+            h3('Disclaimer'),
+            p('The parameters of the tools used have not been specifically optimized. Users can download all raw data and freely adjust parameters according to the provided scripts in', 
+              a("GitHub", href = "https://github.com/jiang-junyao/DRCTdb/tree/main/Reproduce_case")),
+            br(),
             h3('About'),
             p('We hope you find this data resource useful. Please contact us with your experiences and suggestions'),
             br(),
             
             h3('Contact'),
-            p("If your have any question, please don't hesitate to contact us."),
+            p("If your have any question, please don't hesitate to contact us"),
             p("Yunhui: kongyunhui1@gmail.com"),
             p("Junyao:jyjiang@link.cuhk.edu.hk"),
             br(),
