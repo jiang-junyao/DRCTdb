@@ -65,3 +65,7 @@ Based on ldsc result, we perform the following 4 analysis to decode the mechanis
 Here is the test codes for downstream analysis, before run the test code, you need to download the inputs form this [link](https://drctdb.cowtransfer.com/s/b841942cc19549)
 >05.downstream_analysis.html or 05.downstream_analysis.rmd
 
+
+## Disclaimer
+
+The parameters of the tools used have not been specifically optimized. Users can download all raw data and freely adjust parameters according to the provided scripts.
