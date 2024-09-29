@@ -24,3 +24,7 @@ Disease related cell type analysis to decode cell type effect and underlying r
 We also have a step-by-step tutorials to preprocess single cell multiomics data in **reproduce_case folder**
 
 DRCTDB is a fully open-source database, where users can download the entire project and run locally at **db-core folder**
+
+# Citation
+
+kong, Y., jiang, J., Kong, W. et al. DRCTdb: disease-related cell type analysis to decode cell type effect and underlying regulatory mechanisms. Commun Biol 7, 1205 (2024).
