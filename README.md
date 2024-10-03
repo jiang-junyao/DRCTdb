@@ -25,6 +25,8 @@ We also have a step-by-step tutorials to preprocess single cell multiomics data 
 
 DRCTDB is a fully open-source database, where users can download the entire project and run locally at **db-core folder**
 
+All processed data could be download in [Zenodo](https://zenodo.org/records/11362883)
+
 # Citation
 
 kong, Y., jiang, J., Kong, W. et al. DRCTdb: disease-related cell type analysis to decode cell type effect and underlying regulatory mechanisms. Commun Biol 7, 1205 (2024).
